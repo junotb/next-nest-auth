@@ -1,17 +1,36 @@
-import type { NextRequest } from "next/server";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
-export async function middleware(request: NextRequest) {
-	// 요청 헤더에서 로그인 여부를 확인할 수 있도록 쿠키에 접근
-  const jwt = request.cookies.get('jwt');
-	
-	// 로그인 상태가 아니면 Redirection
-  if (!jwt) {
-    return NextResponse.redirect(new URL('/login', request.url));
+// 사용자 세션 정보를 가져오는 함수
+async function getSession(req: NextRequest) {
+  // 실제 애플리케이션에서는 세션 관리 솔루션을 사용하여 세션 정보를 가져와야 합니다.
+  const authToken = req.cookies.get('authToken')?.value;
+  if (authToken === 'valid_token') {
+    return { user: { username: 'username' } };
+  }
+  return null;
+}
+
+export async function middleware(req: NextRequest) {
+  /*
+  const session = await getSession(req);
+
+  // 사용자가 인증되지 않은 경우 로그인 페이지로 리다이렉트
+  if (!session) {
+    return NextResponse.redirect(new URL('/login', req.url));
   }
 	
 	// 로그인 상태면 원래 요청한 경로로 이동한다.
   return NextResponse.next();
+  */
+
+  // Set the 'Set-Cookie' header
+  const response = NextResponse.next()
+  response.cookies.set('authToken', 'valid_token', {
+    path: '/',
+    httpOnly: true,
+  })
+
+  return response;
 }
 
 // matcher에 매칭되는 경로로 접근하는 경우, middleware 실행
