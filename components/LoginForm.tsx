@@ -22,7 +22,6 @@ export default function LoginForm() {
       });
 
       if (response.ok) {
-        console.log('ok');
         // 인증 성공 시 보호된 페이지로 리다이렉트
         router.push('/');
       } else {

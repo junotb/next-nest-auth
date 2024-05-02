@@ -11,7 +11,6 @@ async function getSession(req: NextRequest) {
 }
 
 export async function middleware(req: NextRequest) {
-  /*
   const session = await getSession(req);
 
   // 사용자가 인증되지 않은 경우 로그인 페이지로 리다이렉트
@@ -21,16 +20,6 @@ export async function middleware(req: NextRequest) {
 	
 	// 로그인 상태면 원래 요청한 경로로 이동한다.
   return NextResponse.next();
-  */
-
-  // Set the 'Set-Cookie' header
-  const response = NextResponse.next()
-  response.cookies.set('authToken', 'valid_token', {
-    path: '/',
-    httpOnly: true,
-  })
-
-  return response;
 }
 
 // matcher에 매칭되는 경로로 접근하는 경우, middleware 실행
