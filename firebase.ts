@@ -1,6 +1,7 @@
 // firebase.js
 import { initializeApp } from 'firebase/app';
-import { getFirestore, collection, getDocs, doc, getDoc, query, where } from 'firebase/firestore';
+import { getFirestore, collection, getDocs, query, where } from 'firebase/firestore';
+import { User } from './types/user';
 
 const firebaseConfig = {
   apiKey: process.env.FIREBASE_API_KEY,
@@ -12,23 +13,26 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+const database = getFirestore(app);
 
 export const getUser = async (username: string, password: string) => {
-  try {    
-    const usersRef = collection(db, "users");
-    const q = query(usersRef, where("username", "==", username), where("password", "==", password));
-    const querySnapshot = await getDocs(q);
-
-    if (!querySnapshot.empty) {
-      const document = querySnapshot.docs[0];
-      return document.data();
-    } else {
-      console.log("No matching documents found.");
+  try {
+    const snapshot = await getDocs(query(collection(database, 'users'), where('username', '==', username), where('password', '==', password)));  
+    if (snapshot.empty) {
+      throw new Error('No datas');
     }
+
+    let doc = snapshot.docs[0].data();
+    
+    const user: User = {
+      provider: '',
+      id: doc.id,
+      name: doc.username
+    };
+    return user;
   } catch (error) {
     console.error('데이터 조회 중 오류가 발생했습니다:', error);
-    throw error;
+    throw error;    
   }
 };
 
