@@ -1,12 +1,12 @@
-"use client";
+'use client';
 
-import { useSession } from "next-auth/react";
+import { useSession } from 'next-auth/react';
 
 export default function Home() {
   const { data: session, status } = useSession();
 
   return (
-    <div className="flex flex-col justify-center items-center w-full h-full">
+    <div className='flex flex-col justify-center items-center w-full h-full'>
       <h1><strong>{session?.user.name}</strong>님 환영합니다!</h1>
     </div>
   );

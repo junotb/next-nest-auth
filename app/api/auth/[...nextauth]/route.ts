@@ -1,10 +1,10 @@
-import NextAuth, { NextAuthOptions, User } from "next-auth"
-import FacebookProvider from "next-auth/providers/facebook"
-import NaverProvider from "next-auth/providers/naver"
-import KakaoProvider from "next-auth/providers/kakao"
-import GoogleProvider from "next-auth/providers/google"
-import CredentialsProvider from "next-auth/providers/credentials"
-import { getUser } from "@/firebase"
+import NextAuth, { NextAuthOptions, User } from 'next-auth'
+import FacebookProvider from 'next-auth/providers/facebook'
+import NaverProvider from 'next-auth/providers/naver'
+import KakaoProvider from 'next-auth/providers/kakao'
+import GoogleProvider from 'next-auth/providers/google'
+import CredentialsProvider from 'next-auth/providers/credentials'
+import { getUser } from '@/firebase'
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -27,8 +27,8 @@ export const authOptions: NextAuthOptions = {
     CredentialsProvider({
       name: 'Credentials',
       credentials: {
-        username: { label: "Username", type: "text", placeholder: "username" },
-        password: { label: "Password", type: "password", placeholder: "password" }
+        username: { label: 'Username', type: 'text', placeholder: 'username' },
+        password: { label: 'Password', type: 'password', placeholder: 'password' }
       },
       async authorize(credentials) {
         if (!credentials) {
