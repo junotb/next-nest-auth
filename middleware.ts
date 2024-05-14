@@ -1,24 +1,15 @@
-import { cookies } from "next/headers";
-import { NextResponse } from "next/server";
+import { getToken } from "next-auth/jwt";
+import { NextRequest, NextResponse } from "next/server";
 
-// 사용자 세션 정보를 가져오는 함수
-async function getSession(req: Request) {
-  // 실제 애플리케이션에서는 세션 관리 솔루션을 사용하여 세션 정보를 가져와야 합니다.
-  const cookieStore = cookies();
-  const token = cookieStore.get('authToken')?.value;
+export async function middleware(req: NextRequest) {
+  const token = await getToken({ req });
 
-  return token;
-}
-
-export async function middleware(req: Request) {
-  const session = await getSession(req);
-
-  // 사용자가 인증되지 않은 경우 로그인 페이지로 리다이렉트
-  if (!session) {
+  if (!token) {
+    // 사용자가 인증되지 않은 경우 로그인 페이지로 리다이렉트
     return NextResponse.redirect(new URL('/login', req.url));
   }
 	
-	// 로그인 상태면 원래 요청한 경로로 이동한다.
+  // 로그인 상태면 원래 요청한 경로로 이동한다.
   return NextResponse.next();
 }
 

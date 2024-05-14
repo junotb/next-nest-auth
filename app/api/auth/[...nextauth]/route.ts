@@ -1,10 +1,9 @@
-import NextAuth, { NextAuthOptions } from "next-auth"
+import NextAuth, { NextAuthOptions, User } from "next-auth"
 import FacebookProvider from "next-auth/providers/facebook"
 import NaverProvider from "next-auth/providers/naver"
 import KakaoProvider from "next-auth/providers/kakao"
 import GoogleProvider from "next-auth/providers/google"
 import CredentialsProvider from "next-auth/providers/credentials"
-import { User } from "@/types/user"
 import { getUser } from "@/firebase"
 
 export const authOptions: NextAuthOptions = {
@@ -59,7 +58,7 @@ export const authOptions: NextAuthOptions = {
     },
     async jwt ({ token, user, account }) {
       if (user) {
-        token.provider = account?.provider;
+        user.account = account;
       }
       return token;
     }

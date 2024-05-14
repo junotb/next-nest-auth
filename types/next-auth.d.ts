@@ -1,10 +1,12 @@
-import NextAuth from "next-auth"
-import { User } from "./user"
+import NextAuth, { Account } from "next-auth"
 
 declare module "next-auth" {
   interface Session {
-    user: User,
+    user: {} & DefaultSession["user"],    
     token: JWT,
-    expires: Date
+  }
+
+  interface User {
+    account: Account | null,
   }
 }

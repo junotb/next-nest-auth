@@ -1,14 +1,20 @@
 "use client";
 
-import { getProviders, signIn } from 'next-auth/react';
+import { getProviders, signIn, useSession } from 'next-auth/react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { FormEvent, useEffect, useState } from "react";
 
 export default function LoginForm() {
+  const { data: session, status } = useSession();
+  const router = useRouter();
+
+  if (session && status === 'authenticated') {
+    router.push('/');
+  }
+
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const router = useRouter();
 
   const handleClick = (provider: string) => {
     signIn(provider);
@@ -18,30 +24,6 @@ export default function LoginForm() {
     event.preventDefault();
 
     signIn('credentials', { redirect: false, username: username, password: password });
-    /*
-    try {
-      // API 라우트로 사용자 인증 요청 보내기
-      const response = await fetch('/api/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ username, password }),
-      });
-
-      if (response.ok) {
-        // 인증 성공 시 보호된 페이지로 리다이렉트
-        router.push('/');
-      } else {
-        // 인증 실패 시 에러 메시지 처리
-        const { error } = await response.json();
-        console.error('Login error:', error);
-      }
-    } catch (error) {
-      console.error('Login error:', error);
-      // 인증 오류 처리, 예: 에러 메시지 표시
-    }
-    */
   }
 
   useEffect(() => {

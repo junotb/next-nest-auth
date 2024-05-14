@@ -1,7 +1,7 @@
 // firebase.js
 import { initializeApp } from 'firebase/app';
 import { getFirestore, collection, getDocs, query, where } from 'firebase/firestore';
-import { User } from './types/user';
+import { User } from 'next-auth';
 
 const firebaseConfig = {
   apiKey: process.env.FIREBASE_API_KEY,
@@ -25,7 +25,7 @@ export const getUser = async (username: string, password: string) => {
     let doc = snapshot.docs[0].data();
     
     const user: User = {
-      provider: '',
+      account: null,
       id: doc.id,
       name: doc.username
     };
