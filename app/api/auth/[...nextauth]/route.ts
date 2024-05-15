@@ -8,45 +8,48 @@ import { getUser } from '@/firebase'
 
 export const authOptions: NextAuthOptions = {
   providers: [
-    FacebookProvider({
-      clientId: process.env.FACEBOOK_CLIENT_ID!,
-      clientSecret: process.env.FACEBOOK_CLIENT_SECRET!
+    KakaoProvider({
+      clientId: process.env.KAKAO_CLIENT_ID!,
+      clientSecret: process.env.KAKAO_CLIENT_SECRET!
     }),
     NaverProvider({
       clientId: process.env.NAVER_CLIENT_ID!,
       clientSecret: process.env.NAVER_CLIENT_SECRET!
     }),
-    KakaoProvider({
-      clientId: process.env.KAKAO_CLIENT_ID!,
-      clientSecret: process.env.KAKAO_CLIENT_SECRET!
-    }),
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!
     }),
+    FacebookProvider({
+      clientId: process.env.FACEBOOK_CLIENT_ID!,
+      clientSecret: process.env.FACEBOOK_CLIENT_SECRET!
+    }),
     CredentialsProvider({
       name: 'Credentials',
       credentials: {
-        username: { label: 'Username', type: 'text', placeholder: 'username' },
-        password: { label: 'Password', type: 'password', placeholder: 'password' }
+        username: { label: 'Username', type: 'text' },
+        password: { label: 'Password', type: 'password' }
       },
       async authorize(credentials) {
-        if (!credentials) {
-          return null;
+        // Check if credentials are provided
+        if (!credentials?.username || !credentials?.password) {
+          console.log('Missing credentials');
+          throw new Error('Missing credentials');
         }
 
-        const username = credentials.username;
-        const password = credentials.password;
-
         try {
-          const user: User = await getUser(username, password);
+          const user: User = await getUser(credentials.username, credentials.password);
+
+          // Check if user exists
           if (!user) {
-            throw new Error('No User');
+            console.log('Invalid credentials');
+            throw new Error('Invalid credentials');
           }
+
           return user;
         } catch (error) {
-          console.error('error:', error);
-          return null;
+          console.error('Error during authorization:', error);
+          throw error;
         }
       }
     })
@@ -57,7 +60,7 @@ export const authOptions: NextAuthOptions = {
       return session;
     },
     async jwt ({ token, user, account }) {
-      if (user) {
+      if (account) {
         user.account = account;
       }
       return token;

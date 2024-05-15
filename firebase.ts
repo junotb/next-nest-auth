@@ -1,6 +1,5 @@
-// firebase.js
-import { initializeApp } from 'firebase/app';
-import { getFirestore, collection, getDocs, query, where } from 'firebase/firestore';
+import { FirebaseError, initializeApp } from 'firebase/app';
+import { getFirestore, collection, getDocs, query, where, addDoc } from 'firebase/firestore';
 import { User } from 'next-auth';
 
 const firebaseConfig = {
@@ -15,6 +14,22 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const database = getFirestore(app);
 
+export const addUser = async (username: string, password: string) => {
+  try {
+    const userRef = await addDoc(collection(database, 'users'), {
+      username,
+      password
+    });
+    return userRef.id
+  } catch (error) {
+    if (error instanceof FirebaseError) {
+      throw new Error(`Firebase error: ${error.code} - ${error.message}`);
+    } else {
+      throw new Error('An unknown error occurred');
+    }
+  }
+};
+
 export const getUser = async (username: string, password: string) => {
   try {
     const snapshot = await getDocs(query(collection(database, 'users'), where('username', '==', username), where('password', '==', password)));  
@@ -25,15 +40,18 @@ export const getUser = async (username: string, password: string) => {
     let doc = snapshot.docs[0].data();
     
     const user: User = {
-      account: null,
       id: doc.id,
-      name: doc.username
+      name: doc.username,
+      account: null
     };
     return user;
   } catch (error) {
-    console.error('데이터 조회 중 오류가 발생했습니다:', error);
-    throw error;    
+    if (error instanceof FirebaseError) {
+      throw new Error(`Firebase error: ${error.code} - ${error.message}`);
+    } else {
+      throw new Error('An unknown error occurred');
+    }
   }
 };
 
-export default app;
+export default { addUser, getUser };
