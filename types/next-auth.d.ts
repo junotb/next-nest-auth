@@ -7,6 +7,7 @@ declare module 'next-auth' {
   }
 
   interface User {
-    provider: string
+    provider: string,
+    username: string
   }
 }

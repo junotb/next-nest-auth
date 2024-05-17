@@ -4,6 +4,7 @@ import { signIn } from 'next-auth/react';
 import { FormEvent, useRef, useState } from 'react';
 
 export default function SignUpForm() {
+  const nameRef = useRef<HTMLInputElement>(null);
   const usernameRef = useRef<HTMLInputElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
   const confirmRef = useRef<HTMLInputElement>(null);
@@ -12,6 +13,7 @@ export default function SignUpForm() {
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
 
+    const name = nameRef.current?.value;
     const username = usernameRef.current?.value;
     const password = passwordRef.current?.value;
     const confirm = confirmRef.current?.value;
@@ -21,7 +23,12 @@ export default function SignUpForm() {
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ username: username, password: password, confirm: confirm })
+      body: JSON.stringify({
+        name: name,
+        username: username,
+        password: password,
+        confirm: confirm
+      })
     });
 
     if (!response.ok) {
@@ -36,8 +43,16 @@ export default function SignUpForm() {
   return (
     <form
       onSubmit={handleSubmit}
-      className='flex flex-col gap-4 justify-center m-4'
+      className='flex flex-col gap-4 justify-center'
     >
+      <div className='flex justify-between items-center gap-2'>
+        <label className='text-lg font-bold' htmlFor='username'>Name</label>
+        <input
+          type='text'
+          ref={nameRef}
+          className='p-2 text-black bg-white hover:bg-neutral-300 focus:bg-neutral-300 outline-none rounded'
+          placeholder='Enter Username' />
+      </div>
       <div className='flex justify-between items-center gap-2'>
         <label className='text-lg font-bold' htmlFor='username'>Username</label>
         <input

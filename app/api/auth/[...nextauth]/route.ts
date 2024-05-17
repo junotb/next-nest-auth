@@ -4,7 +4,7 @@ import NaverProvider from 'next-auth/providers/naver'
 import KakaoProvider from 'next-auth/providers/kakao'
 import GoogleProvider from 'next-auth/providers/google'
 import CredentialsProvider from 'next-auth/providers/credentials'
-import { addUser, getSnsUser, getUser } from '@/firebase'
+import { addOAuthUser, getOAuthUser, getCredentialsUser } from '@/firebase'
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -25,40 +25,37 @@ export const authOptions: NextAuthOptions = {
       clientSecret: process.env.FACEBOOK_CLIENT_SECRET!
     }),
     CredentialsProvider({
+      type: 'credentials',
+      id: 'credentials',
       name: 'Credentials',
       credentials: {
         username: { label: 'Username', type: 'text' },
         password: { label: 'Password', type: 'password' }
       },
       async authorize(credentials) {
-        // Check if credentials are provided
-        if (!credentials?.username || !credentials?.password) {
-          console.error('Missing credentials');
-          throw new Error('Missing credentials');
+        // 아이디와 비밀번호 입력 여부 체크
+        if (!credentials || !credentials.username || !credentials.password) {
+          return null;
         }
 
-        const user: User = await getUser(credentials.username, credentials.password);
-
-        // If no error and we have user data, return it
-        if (user) {
-          return user;
-        }
-        // Return null if user data could not be retrieved
-        return null
+        // 회원 조회 (User 객체 또는 null 반환)
+        return getCredentialsUser(credentials.username, credentials.password);
       }
     })
   ],
   callbacks: {
     async signIn({ user, account, profile, credentials }) {
-      const isAllowedToSignIn = true
-      if (account && profile) {
-        console.log(account);
-        console.log(profile);
-        const snsUser = await getSnsUser(account.provider, account.providerAccountId);
+      // SNS 로그인 처리 (임시 로직 - 자동 가입)
+      if (user && account && profile) {
+        const snsUser = await getOAuthUser(account.provider, account.providerAccountId);
+        console.log(snsUser);
         if (!snsUser) {
-          addUser(account.providerAccountId, null, account);
+          addOAuthUser(user.name!, account.providerAccountId, account);
         }
       }
+
+      // 로그인 제한 로직 (필요 시 활용)
+      const isAllowedToSignIn = true;
       if (isAllowedToSignIn) {
         return true
       } else {
