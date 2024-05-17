@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const userId = await addUser(username, password);
+    const userId = await addUser(username, password, null);
     return NextResponse.json({ userId }, { status: 201 });
   } catch (error) {
     console.error('Error adding user:', error);

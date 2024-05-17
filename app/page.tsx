@@ -4,13 +4,12 @@ import { signOut, useSession } from 'next-auth/react';
 
 export default function Home() {
   const { data: session, status } = useSession();
-  console.log(session);
 
   const handleClick = () => signOut();
 
   return (
     <div className='flex flex-col justify-center items-center gap-4 w-full h-full'>
-      <h1>Hello, <strong>{session?.user.name}</strong>!</h1>
+      <h1>Hello, <strong>{session?.user?.name}</strong>!</h1>
       <button
         type='button'
         onClick={handleClick}

@@ -4,7 +4,7 @@ import NaverProvider from 'next-auth/providers/naver'
 import KakaoProvider from 'next-auth/providers/kakao'
 import GoogleProvider from 'next-auth/providers/google'
 import CredentialsProvider from 'next-auth/providers/credentials'
-import { getUser } from '@/firebase'
+import { addUser, getSnsUser, getUser } from '@/firebase'
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -33,38 +33,52 @@ export const authOptions: NextAuthOptions = {
       async authorize(credentials) {
         // Check if credentials are provided
         if (!credentials?.username || !credentials?.password) {
-          console.log('Missing credentials');
+          console.error('Missing credentials');
           throw new Error('Missing credentials');
         }
 
-        try {
-          const user: User = await getUser(credentials.username, credentials.password);
+        const user: User = await getUser(credentials.username, credentials.password);
 
-          // Check if user exists
-          if (!user) {
-            console.log('Invalid credentials');
-            throw new Error('Invalid credentials');
-          }
-
+        // If no error and we have user data, return it
+        if (user) {
           return user;
-        } catch (error) {
-          console.error('Error during authorization:', error);
-          throw error;
         }
+        // Return null if user data could not be retrieved
+        return null
       }
     })
   ],
   callbacks: {
-    async session ({ session, token }) {
+    async signIn({ user, account, profile, credentials }) {
+      const isAllowedToSignIn = true
+      if (account && profile) {
+        console.log(account);
+        console.log(profile);
+        const snsUser = await getSnsUser(account.provider, account.providerAccountId);
+        if (!snsUser) {
+          addUser(account.providerAccountId, null, account);
+        }
+      }
+      if (isAllowedToSignIn) {
+        return true
+      } else {
+        // Return false to display a default error message
+        return false
+        // Or you can return a URL to redirect to:
+        // return '/unauthorized'
+      }
+    },
+    async redirect({ url, baseUrl }) {
+      return baseUrl;
+    },
+    async session({ session, user, token }) {
       session.token = token;
       return session;
     },
-    async jwt ({ token, user, account }) {
-      if (account) {
-        user.account = account;
-      }
+    async jwt({ token, user, account, profile }) {
       return token;
-    }
+    },
+    
   },
   secret: process.env.NEXTAUTH_SECRET
 }

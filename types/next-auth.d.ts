@@ -1,12 +1,12 @@
 import NextAuth, { Account } from 'next-auth'
+import { JWT } from 'next-auth/jwt'
 
 declare module 'next-auth' {
   interface Session {
-    user: {} & DefaultSession['user'],    
-    token: JWT,
+    token: JWT
   }
 
   interface User {
-    account: Account | null,
+    provider: string
   }
 }
