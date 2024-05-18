@@ -29,7 +29,6 @@ function ErrorMessage() {
 }
 
 export default function ErrorPage() {
-
   return (
     <Suspense>
       <ErrorMessage />
