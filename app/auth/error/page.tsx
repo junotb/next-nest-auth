@@ -2,6 +2,7 @@
 
 import Image from 'next/image';
 import { useSearchParams } from 'next/navigation';
+import { Suspense } from 'react';
 
 export default function ErrorPage() {
   const searchParams = useSearchParams();
@@ -15,14 +16,16 @@ export default function ErrorPage() {
   }
 
   return (
-    <div className='flex flex-col justify-center items-center w-full h-full'>
-      <Image
-        src='/images/icon-exclamation-circle.svg'
-        width={36}
-        height={36}
-        className='animate-ping'
-        alt='Redirecting to login page...'
-      />
-    </div>
+    <Suspense fallback={<div>Loading...</div>}>
+      <div className='flex flex-col justify-center items-center w-full h-full'>
+        <Image
+          src='/images/icon-exclamation-circle.svg'
+          width={36}
+          height={36}
+          className='animate-ping'
+          alt='Redirecting to login page...'
+        />
+      </div>
+    </Suspense>
   );
 }

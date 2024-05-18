@@ -3,18 +3,13 @@
 @tailwind utilities;
 
 :root {
-  --foreground-rgb: 255, 255, 255;
-  --background-rgb: 0, 0, 0;
+  --black-rgb: 0, 0, 0;
+  --white-rgb: 255, 255, 255;
 }
 
 html, body {
   width: 100%;
   height: 100%;
-}
-
-body {
-  color: rgb(var(--foreground-rgb));
-  background: rgb(var(--background-rgb));
 }
 
 @layer utilities {

@@ -24,11 +24,11 @@ export const addCredentialsUser = async (name: string, username: string, passwor
     return userRef.id;
   } catch (error) {
     if (error instanceof FirebaseError) {
-      console.error(`Firebase error: ${error.code} - ${error.message}`);
-      throw new Error(`Firebase error: ${error.code} - ${error.message}`);
+      console.error(`파이어베이스 오류: ${error.code} - ${error.message}`);
+      throw new Error(`파이어베이스 오류: ${error.code} - ${error.message}`);
     } else {
-      console.error('An unknown error occurred');
-      throw new Error('An unknown error occurred');
+      console.error('알 수 없는 오류가 발생했습니다.');
+      throw new Error('알 수 없는 오류가 발생했습니다.');
     }
   }
 };
@@ -43,11 +43,11 @@ export const addOAuthUser = async (name: string, username: string, provider: Pro
     return userRef.id
   } catch (error) {
     if (error instanceof FirebaseError) {
-      console.error(`Firebase error: ${error.code} - ${error.message}`);
-      throw new Error(`Firebase error: ${error.code} - ${error.message}`);
+      console.error(`파이어베이스 오류: ${error.code} - ${error.message}`);
+      throw new Error(`파이어베이스 오류: ${error.code} - ${error.message}`);
     } else {
-      console.error('An unknown error occurred');
-      throw new Error('An unknown error occurred');
+      console.error('알 수 없는 오류가 발생했습니다.');
+      throw new Error('알 수 없는 오류가 발생했습니다.');
     }
   }
 };
@@ -70,14 +70,14 @@ export const getCredentialsUser = async (username: string, password: string) => 
     return user;
   } catch (error) {
     if (error instanceof FirebaseError) {
-      console.error(`Firebase error: ${error.code} - ${error.message}`);
-      throw new Error(`Firebase error: ${error.code} - ${error.message}`);
+      console.error(`파이어베이스 오류: ${error.code} - ${error.message}`);
+      throw new Error(`파이어베이스 오류: ${error.code} - ${error.message}`);
     } else if (error instanceof Error) {
       console.error(error.message);
       throw new Error(error.message);
     } else {
-      console.error('An unknown error occurred');
-      throw new Error('An unknown error occurred');
+      console.error('알 수 없는 오류가 발생했습니다.');
+      throw new Error('알 수 없는 오류가 발생했습니다.');
     }
   }
 };
@@ -86,8 +86,7 @@ export const getOAuthUser = async (providerName: string, providerAccountId: stri
   try {
     const snapshot = await getDocs(query(collection(database, 'users'), where('provider.provider', '==', providerName), where('provider.providerAccountId', '==', providerAccountId)));  
     if (snapshot.empty) {
-      console.error('User is not existed');
-      // getUser와 다르게 Error 처리하지 않음
+      console.error('사용자 정보가 존재하지 않습니다.');
       return null;
     }
 
@@ -101,14 +100,14 @@ export const getOAuthUser = async (providerName: string, providerAccountId: stri
     return user;
   } catch (error) {
     if (error instanceof FirebaseError) {
-      console.error(`Firebase error: ${error.code} - ${error.message}`);
-      throw new Error(`Firebase error: ${error.code} - ${error.message}`);
+      console.error(`파이어베이스 오류: ${error.code} - ${error.message}`);
+      throw new Error(`파이어베이스 오류: ${error.code} - ${error.message}`);
     } else if (error instanceof Error) {
       console.error(error.message);
       throw new Error(error.message);
     } else {
-      console.error('An unknown error occurred');
-      throw new Error('An unknown error occurred');
+      console.error('알 수 없는 오류가 발생했습니다.');
+      throw new Error('알 수 없는 오류가 발생했습니다.');
     }
   }
 };

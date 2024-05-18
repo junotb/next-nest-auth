@@ -6,21 +6,17 @@ interface SignupRequest {
   name: string;
   username: string;
   password: string;
-  confirm: string;
 }
 
 export async function POST(req: NextRequest) {
-  const { name, username, password, confirm }: SignupRequest = await req.json();
+  const { name, username, password }: SignupRequest = await req.json();
 
   // 필요 추가 요소
   // 아이디와 비밀번호 유효성 검사 규칙
   // 비밀번호 암호화 함수
 
-  if (!username || !password || !confirm) {
-    return NextResponse.json({ error: '사용자 이름과 비밀번호를 입력해야 합니다.' }, { status: 400 });
-  }
-  if (password !== confirm) {
-    return NextResponse.json({ error: '비밀번호가 일치하지 않습니다.' }, { status: 400 });
+  if (!name || !username || !password) {
+    return NextResponse.json({ error: '이름, 아이디, 비밀번호를 입력해야 합니다.' }, { status: 400 });
   }
 
   try {

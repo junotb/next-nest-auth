@@ -1,16 +1,14 @@
 'use client';
 
-import SignUpAlert from '@/components/SignUpAlert';
+import Header from '@/components/Header';
 import SignUpForm from '@/components/SignUpForm';
 import { useSession } from 'next-auth/react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
 export default function Page() {
   const { data: session } = useSession();
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const message = searchParams.get('error'); // Parameter from /api/auth/error redirect
 
   useEffect(() => {
     // 세션이 있으면 메인 페이지로 이동
@@ -20,10 +18,12 @@ export default function Page() {
   }, [session, router]);
 
   return (
-    <div className='flex flex-col gap-4 justify-center items-center w-full h-full'>
-      { message && <SignUpAlert message={message} />}
-      <div className='flex flex-col gap-4 border p-4 w-full max-w-xs text-sm rounded'>
-        <SignUpForm />
+    <div className='flex flex-col gap-4 w-full h-full bg-white dark:bg-black'>
+      <Header />
+      <div className='flex flex-col gap-4 justify-center items-center w-full h-full'>
+        <div className='flex flex-col gap-4  w-full max-w-xs'>
+          <SignUpForm />
+        </div>
       </div>
     </div>
   );
