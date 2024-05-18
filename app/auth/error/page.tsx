@@ -3,8 +3,8 @@
 import Image from 'next/image';
 import { useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
-
-export default function ErrorPage() {
+ 
+function ErrorMessage() {
   const searchParams = useSearchParams();
   const error = searchParams.get('error');
 
@@ -14,18 +14,25 @@ export default function ErrorPage() {
   } else if (error === 'OAuthSignin') {
     message = '소셜 로그인에 실패했습니다.';
   }
+ 
+  return (
+    <div className='flex flex-col justify-center items-center w-full h-full'>
+      <Image
+        src='/images/icon-exclamation-circle.svg'
+        width={36}
+        height={36}
+        className='animate-ping'
+        alt='Redirecting to login page...'
+      />
+    </div>
+  )
+}
+
+export default function ErrorPage() {
 
   return (
-    <Suspense fallback={<div>로딩중...</div>}>
-      <div className='flex flex-col justify-center items-center w-full h-full'>
-        <Image
-          src='/images/icon-exclamation-circle.svg'
-          width={36}
-          height={36}
-          className='animate-ping'
-          alt='Redirecting to login page...'
-        />
-      </div>
+    <Suspense>
+      <ErrorMessage />
     </Suspense>
   );
 }
