@@ -16,7 +16,7 @@ export default function ErrorPage() {
   }
 
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense fallback={<div>로딩중...</div>}>
       <div className='flex flex-col justify-center items-center w-full h-full'>
         <Image
           src='/images/icon-exclamation-circle.svg'
