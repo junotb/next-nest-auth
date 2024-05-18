@@ -14,7 +14,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const database = getFirestore(app);
 
-const addCredentialsUser = async (name: string, username: string, password: string) => {
+export const addCredentialsUser = async (name: string, username: string, password: string) => {
   try {
     const userRef = await addDoc(collection(database, 'users'), {
       name,
@@ -33,7 +33,7 @@ const addCredentialsUser = async (name: string, username: string, password: stri
   }
 };
 
-const addOAuthUser = async (name: string, username: string, provider: Provider) => {
+export const addOAuthUser = async (name: string, username: string, provider: Provider) => {
   try {
     const userRef = await addDoc(collection(database, 'users'), {
       name,
@@ -52,7 +52,7 @@ const addOAuthUser = async (name: string, username: string, provider: Provider) 
   }
 };
 
-const getCredentialsUser = async (username: string, password: string) => {
+export const getCredentialsUser = async (username: string, password: string) => {
   try {
     const snapshot = await getDocs(query(collection(database, 'users'), where('username', '==', username), where('password', '==', password)));  
     if (snapshot.empty) {
@@ -82,7 +82,7 @@ const getCredentialsUser = async (username: string, password: string) => {
   }
 };
 
-const getOAuthUser = async (providerName: string, providerAccountId: string) => {
+export const getOAuthUser = async (providerName: string, providerAccountId: string) => {
   try {
     const snapshot = await getDocs(query(collection(database, 'users'), where('provider.provider', '==', providerName), where('provider.providerAccountId', '==', providerAccountId)));  
     if (snapshot.empty) {
