@@ -6,7 +6,6 @@ export const useDarkMode = () => {
 	const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
 
 	const handleDarkMode = () => {
-		console.log(isDarkMode);
     setIsDarkMode(!isDarkMode);
     document.documentElement.classList.toggle('dark');
 	}

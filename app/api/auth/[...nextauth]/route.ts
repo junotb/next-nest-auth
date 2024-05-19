@@ -1,4 +1,4 @@
-import NextAuth, { NextAuthOptions, User } from 'next-auth'
+import NextAuth, { NextAuthOptions } from 'next-auth'
 import FacebookProvider from 'next-auth/providers/facebook'
 import NaverProvider from 'next-auth/providers/naver'
 import KakaoProvider from 'next-auth/providers/kakao'
@@ -48,7 +48,6 @@ const authOptions: NextAuthOptions = {
       // SNS 로그인 처리 (임시 로직 - 자동 가입)
       if (user && account && profile) {
         const snsUser = await getOAuthUser(account.provider, account.providerAccountId);
-        console.log(snsUser);
         if (!snsUser) {
           addOAuthUser(user.name!, account.providerAccountId, account);
         }
