@@ -2,8 +2,6 @@
 
 import { signIn } from "next-auth/react";
 import { FormEvent, useRef, useState } from "react";
-import SocialLoginButtons from "./SocialLoginButtons";
-import Link from "next/link";
 
 export default function LoginForm() {
   const usernameRef = useRef<HTMLInputElement>(null);
@@ -34,11 +32,11 @@ export default function LoginForm() {
   }
 
   return (
-    <div className="flex flex-col gap-4 justify-center border border-black dark:border-white bg-white dark:bg-black text-black dark:text-white p-4 rounded">
+    <>
       { errorMessage && LoginAlert(errorMessage) }
       <form
         onSubmit={handleSubmit}
-        className='flex flex-col gap-4 justify-center rounded'
+        className='flex flex-col gap-4 justify-center w-96 border border-black dark:border-white bg-white dark:bg-black text-black dark:text-white p-4 rounded'
       >
         <div className='flex justify-between items-center gap-2'>
           <label className='font-bold' htmlFor='username'>아이디</label>
@@ -56,27 +54,16 @@ export default function LoginForm() {
             className='p-2 w-52 border border-black dark:border-white bg-white dark:bg-black text-black dark:text-white hover:bg-neutral-300 dark:hover:bg-neutral-500 focus:bg-neutral-300 dark:focus:bg-neutral-500 placeholder:text-neutral-500 dark:placeholder:text-neutral-300 outline-none rounded'
             placeholder='비밀번호를 입력해주세요' />
         </div>
-        <button
-          type="button"
-          className='w-full border border-black dark:border-white bg-white dark:bg-black text-black dark:text-white p-2 font-bold hover:bg-neutral-300 dark:hover:bg-neutral-500 active:bg-neutral-500 dark:active:bg-neutral-300 rounded'
-        >로그인</button>
+        <button className='w-full border border-black dark:border-white bg-white dark:bg-black text-black dark:text-white p-2 font-bold hover:bg-neutral-300 dark:hover:bg-neutral-500 active:bg-neutral-500 dark:active:bg-neutral-300 rounded'>로그인</button>
       </form>
-      <SocialLoginButtons />
-      <div className='flex justify-center'>
-        <p className='text-black dark:text-white'>처음이신가요?</p>&nbsp;
-        <Link
-          href='/auth/signup'
-          className='font-bold border-black dark:border-white text-neutral-300 dark:text-neutral-500 hover:text-neutral-500 dark:hover:text-neutral-300'
-        >회원가입</Link>
-      </div>
-    </div>
+    </>
   );
 }
 
 const LoginAlert = (errorMessage: string) => {
   return (
     <div
-      className='border border-black dark:border-white bg-white dark:bg-black text-black dark:text-white p-4 w-full rounded'
+      className='border border-black dark:border-white bg-white dark:bg-black text-black dark:text-white p-4 w-96 rounded'
       role='alert'
     >{errorMessage}</div>
   );

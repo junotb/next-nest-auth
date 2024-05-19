@@ -4,7 +4,6 @@ import { getToken } from 'next-auth/jwt';
 
 export async function middleware(req: NextRequest) {
   const token = await getToken({ req });
-  console.log(token);
 
   if (!token) {
     // Redirect to the login page if the user is not authenticated

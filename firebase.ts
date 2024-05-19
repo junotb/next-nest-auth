@@ -1,5 +1,5 @@
 import { FirebaseError, initializeApp } from 'firebase/app';
-import { getFirestore, collection, getDocs, query, where, addDoc } from 'firebase/firestore';
+import { getFirestore, collection, getDocs, query, where, addDoc, setDoc } from 'firebase/firestore';
 import { User } from 'next-auth';
 
 const firebaseConfig = {
@@ -33,7 +33,7 @@ export const addCredentialsUser = async (name: string, username: string, passwor
   }
 };
 
-export const addOAuthUser = async (name: string, username: string, provider: Provider) => {
+export const addOAuthUser = async (name: string, username: string, provider: { provider: string, providerAccountId: string }) => {
   try {
     const userRef = await addDoc(collection(database, 'users'), {
       name,

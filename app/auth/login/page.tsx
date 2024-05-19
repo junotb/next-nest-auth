@@ -1,8 +1,9 @@
 'use client';
 
-import Header from '@/components/Header';
 import LoginForm from '@/components/LoginForm';
+import SocialLoginButtons from '@/components/SocialLoginButtons';
 import { useSession } from 'next-auth/react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
@@ -18,12 +19,15 @@ export default function Page() {
   }, [session, router]);
 
   return (
-    <div className='flex flex-col gap-4 w-full h-full bg-white dark:bg-black'>
-      <Header />
-      <div className='flex flex-col gap-4 justify-center items-center w-full h-full'>
-        <div className='flex flex-col gap-4 w-full max-w-xs'>
-          <LoginForm />
-        </div>
+    <div className="flex flex-col gap-4 justify-center w-96">
+      <LoginForm />
+      <SocialLoginButtons />
+      <div className='flex justify-center'>
+        <p className='text-black dark:text-white'>처음이신가요?</p>&nbsp;
+        <Link
+          href='/auth/signup'
+          className='font-bold border-black dark:border-white text-neutral-300 dark:text-neutral-500 hover:text-neutral-500 dark:hover:text-neutral-300'
+        >회원가입</Link>
       </div>
     </div>
   );

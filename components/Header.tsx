@@ -11,7 +11,7 @@ export default function Header() {
 	};
   
   return (
-    <div className="border-b border-black dark:border-white bg-white dark:bg-black p-4 text-right">
+    <div className="absolute top-0 py-4 w-96 text-right">
       <button
         type="button"
         onClick={handleDarkMode}

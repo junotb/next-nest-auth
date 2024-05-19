@@ -44,12 +44,15 @@ const authOptions: NextAuthOptions = {
     })
   ],
   callbacks: {
-    async signIn({ user, account, profile, credentials }) {
-      // SNS 로그인 처리 (임시 로직 - 자동 가입)
+    async signIn({ user, account, profile, email, credentials }) {
+      // SNS 로그인 체크
       if (user && account && profile) {
         const snsUser = await getOAuthUser(account.provider, account.providerAccountId);
         if (!snsUser) {
-          addOAuthUser(user.name!, account.providerAccountId, account);
+          addOAuthUser(user.name!, account.providerAccountId, {
+            provider: account.provider,
+            providerAccountId: account.providerAccountId
+          });  
         }
       }
 
@@ -67,11 +70,11 @@ const authOptions: NextAuthOptions = {
     async redirect({ url, baseUrl }) {
       return baseUrl;
     },
-    async session({ session, user, token }) {
+    async session({ session, token, user }) {
       session.token = token;
       return session;
     },
-    async jwt({ token, user, account, profile }) {
+    async jwt({ token, user, account, profile, trigger }) {
       return token;
     },
     

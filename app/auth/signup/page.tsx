@@ -18,13 +18,6 @@ export default function Page() {
   }, [session, router]);
 
   return (
-    <div className='flex flex-col gap-4 w-full h-full bg-white dark:bg-black'>
-      <Header />
-      <div className='flex flex-col gap-4 justify-center items-center w-full h-full'>
-        <div className='flex flex-col gap-4  w-full max-w-xs'>
-          <SignUpForm />
-        </div>
-      </div>
-    </div>
+    <SignUpForm />
   );
 }
