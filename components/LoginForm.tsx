@@ -58,7 +58,7 @@ export default function LoginForm() {
         </div>
         <button
           type="button"
-          className='border border-black dark:border-white bg-white dark:bg-black text-black dark:text-white p-2 w-52 font-bold hover:bg-neutral-300 dark:hover:bg-neutral-500 active:bg-neutral-500 dark:active:bg-neutral-300 rounded'
+          className='w-full border border-black dark:border-white bg-white dark:bg-black text-black dark:text-white p-2 font-bold hover:bg-neutral-300 dark:hover:bg-neutral-500 active:bg-neutral-500 dark:active:bg-neutral-300 rounded'
         >로그인</button>
       </form>
       <SocialLoginButtons />
