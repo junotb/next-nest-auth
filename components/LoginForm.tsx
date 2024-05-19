@@ -56,7 +56,10 @@ export default function LoginForm() {
             className='p-2 w-52 border border-black dark:border-white bg-white dark:bg-black text-black dark:text-white hover:bg-neutral-300 dark:hover:bg-neutral-500 focus:bg-neutral-300 dark:focus:bg-neutral-500 placeholder:text-neutral-500 dark:placeholder:text-neutral-300 outline-none rounded'
             placeholder='비밀번호를 입력해주세요' />
         </div>
-        <button className='border border-black dark:border-white bg-white dark:bg-black text-black dark:text-white p-2 w-52 font-bold hover:bg-neutral-300 dark:hover:bg-neutral-500 active:bg-neutral-500 dark:active:bg-neutral-300 rounded'>로그인</button>
+        <button
+          type="button"
+          className='border border-black dark:border-white bg-white dark:bg-black text-black dark:text-white p-2 w-52 font-bold hover:bg-neutral-300 dark:hover:bg-neutral-500 active:bg-neutral-500 dark:active:bg-neutral-300 rounded'
+        >로그인</button>
       </form>
       <SocialLoginButtons />
       <div className='flex justify-center'>

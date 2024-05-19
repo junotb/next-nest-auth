@@ -68,7 +68,10 @@ export default function SignUpForm() {
             className='p-2 w-52 border border-black dark:border-white text-black dark:text-white bg-white dark:bg-black hover:bg-neutral-300 dark:hover:bg-neutral-500 focus:bg-neutral-300 dark:focus:bg-neutral-500 placeholder:text-neutral-500 dark:placeholder:text-neutral-300 outline-none rounded'
             placeholder='비밀번호를 입력해주세요' />
         </div>
-        <button className='border border-black dark:border-white p-2 font-bold hover:bg-neutral-300 active:bg-neutral-500 dark:hover:bg-neutral-500 dark:active:bg-neutral-300 rounded'>회원가입</button>
+        <button
+          type="button"
+          className='w-full border border-black dark:border-white p-2 font-bold hover:bg-neutral-300 active:bg-neutral-500 dark:hover:bg-neutral-500 dark:active:bg-neutral-300 rounded'
+        >회원가입</button>
       </form>
     </>
   );
