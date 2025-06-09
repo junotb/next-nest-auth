@@ -1,0 +1,31 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  IDX                   Int      @id @default(autoincrement())
+  ID                    String      @unique
+  PWD                   String
+  USE_PWD               Int
+  NAME                  String
+  NICK_NAME             String
+  CREATE_DATE           Int
+  UPDATE_DATE           Int
+  LAST_LOGIN_DATE       Int?
+  @@map("USER")
+}
+
+model SocialUser {
+  IDX                   Int      @id @default(autoincrement())
+  USER_IDX              Int      @unique
+  PROVIDER              String
+  PROVIDER_ACCOUNT_ID   String      @unique
+  TOKEN_TYPE            String
+  TYPE                  String
+  @@map("SOCIAL_USER")
+}

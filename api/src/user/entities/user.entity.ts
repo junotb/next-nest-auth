@@ -3,30 +3,30 @@ import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 @Entity()
 export class User {
   @PrimaryGeneratedColumn()
-  @Column({ type: 'bigint', nullable: false, unique: true })
+  @Column({ type: 'int', nullable: false, default: { generated: 'increment' } })
   IDX: number;
 
-  @Column({ type: 'varchar', nullable: false })
+  @Column({ type: 'string', nullable: false, unique: true })
   ID: string;
 
-  @Column({ type: 'varchar', nullable: false })
+  @Column({ type: 'string', nullable: false })
   PWD: string;
 
-  @Column({ type: 'tinyint', nullable: true })
+  @Column({ type: 'int', nullable: true })
   USE_PWD: number;
 
-  @Column({ type: 'varchar', nullable: false })
+  @Column({ type: 'string', nullable: false })
   NAME: string;
 
-  @Column({ type: 'varchar', nullable: true })
+  @Column({ type: 'string', nullable: true })
   NICK_NAME: string;
 
-  @Column({ type: 'bigint', nullable: false })
+  @Column({ type: 'int', nullable: false })
   CREATE_DATE: number; // timestamp
 
-  @Column({ type: 'bigint', nullable: false })
+  @Column({ type: 'int', nullable: false })
   UPDATE_DATE: number; // timestamp
 
-  @Column({ type: 'bigint', nullable: true })
-  LAST_LOGIN_DATE: number; // timestamp
+  @Column({ type: 'int', nullable: true })
+  LAST_LOGIN_DATE: number | null; // timestamp
 }
