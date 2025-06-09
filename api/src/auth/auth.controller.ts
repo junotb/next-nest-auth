@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Get, Res, UseGuards, Req } from '@nestjs/common';
+import { Controller, Post, Body, Get, Res, UseGuards, Req, BadRequestException } from '@nestjs/common';
 import { Response } from 'express';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { AuthService } from './auth.service';
@@ -20,7 +20,7 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response
   ) {
     const { id, pwd } = dto;
-    if (!id || !pwd) throw new Error('이메일과 비밀번호를 입력해주세요.');
+    if (!id || !pwd) throw new BadRequestException('이메일과 비밀번호를 입력해주세요.');
 
     return this.authService.login(id, pwd, res);
   }

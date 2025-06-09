@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy, ExtractJwt } from 'passport-jwt';
 import { PrismaService } from '../prisma/prisma.service';
@@ -7,7 +7,7 @@ import { PrismaService } from '../prisma/prisma.service';
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(private prisma: PrismaService) {
     const jwtSecret = process.env.JWT_SECRET;
-    if (!jwtSecret) throw new Error('JWT 비밀 키가 설정되어 있지 않습니다.');
+    if (!jwtSecret) throw new BadRequestException('JWT 비밀 키가 설정되어 있지 않습니다.');
 
     // JWT 전략 설정
     super({

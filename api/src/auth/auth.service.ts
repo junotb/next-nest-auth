@@ -9,7 +9,7 @@ export class AuthService {
 
   private getJwtSecret(): string {
     const jwtSecret = process.env.JWT_SECRET;
-    if (!jwtSecret) throw new Error('JWT 비밀 키가 설정되어 있지 않습니다.');
+    if (!jwtSecret) throw new BadRequestException('JWT 비밀 키가 설정되어 있지 않습니다.');
     return jwtSecret;
   }
   
