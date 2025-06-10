@@ -17,11 +17,6 @@ export class UserController {
     return this.userService.findAll();
   }
 
-  @Get(':idx')
-  findOne(@Param('idx', ParseIntPipe) idx: number) {
-    return this.userService.findOne(idx);
-  }
-
   @Patch(':idx')
   update(@Param('idx', ParseIntPipe) idx: number, @Body() updateUserDto: UpdateUserDto) {
     return this.userService.update(idx, updateUserDto);
