@@ -1,69 +1,113 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException, UnauthorizedException } from '@nestjs/common';
 import { Request, Response } from 'express';
 import * as jwt from 'jsonwebtoken';
-import { PrismaService } from '../prisma/prisma.service';
+import { LoginAuthDto } from './dto/login-auth.dto';
+import { UserService } from '../user/user.service';
+import { SafeUser } from '../common/type/safe-user.type';
+import { RefreshTokenAuthDto } from './dto/refresh-token-auth.dto';
+import { RegisterAuthDto } from './dto/register-auth.dto';
+import { CreateUserDto } from 'src/user/dto/create-user.dto';
 
 @Injectable()
 export class AuthService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly userService: UserService) {}
 
+  /**
+   * JWT 비밀 키를 가져옵니다.
+   * @returns JWT 비밀 키
+   */
   private getJwtSecret(): string {
     const jwtSecret = process.env.JWT_SECRET;
-    if (!jwtSecret) throw new BadRequestException('JWT 비밀 키가 설정되어 있지 않습니다.');
+    if (!jwtSecret) throw new InternalServerErrorException('JWT 비밀 키가 설정되어 있지 않습니다.');
     return jwtSecret;
   }
-  
-  async login(id: string, pwd: string, res: Response): Promise<{ message: string, statusCode: number }> {
-    const encodedPassword = Buffer.from(pwd).toString('base64');
+
+  /**
+   * 사용자 로그인 처리
+   * @param id 사용자 ID
+   * @param pwd 사용자 비밀번호
+   * @param res 응답 객체
+   * @returns 로그인 성공 메시지
+   */
+  async login(dto: LoginAuthDto): Promise<{ message: string, accessToken: string, refreshToken: string }> {
+    const { id, pwd } = dto;
 
     // 사용자 조회
-    const user = await this.prisma.user.findUnique({ where: { ID: id } });
-    if (!user || user.PWD !== encodedPassword) {
-      throw new BadRequestException('이메일 또는 비밀번호가 잘못되었습니다.');
-    }
+    const user = await this.userService.findById(id);
+
+    // 비밀번호 확인
+    const encodedPassword = Buffer.from(pwd).toString('base64');
+    if (user.pwd !== encodedPassword) throw new BadRequestException('비밀번호가 일치하지 않습니다.');
 
     // JWT 토큰 생성
-    const payload = { sub: user.IDX };
+    const payload = { sub: user.idx };
     const accessToken = jwt.sign(payload, this.getJwtSecret(), { expiresIn: "15m" });
     const refreshToken = jwt.sign(payload, this.getJwtSecret(), { expiresIn: "7d" });
 
-    // 쿠키 설정
-    res.cookie('ACCESS_TOKEN', accessToken, {
-      httpOnly: true,
-      sameSite: 'lax',
-      secure: process.env.NODE_ENV === 'production', // 프로덕션 환경에서는 secure 설정
-      maxAge: 1000 * 60 * 15, // 15분
-    });
-    res.cookie('REFRESH_TOKEN', refreshToken, {
-      httpOnly: true,
-      sameSite: 'lax',
-      secure: process.env.NODE_ENV === 'production',
-      maxAge: 1000 * 60 * 60 * 24 * 7, // 7일
-    });
-
-    return { message: '로그인 성공', statusCode: 200 };
+    return {
+      message: '로그인 성공',
+      accessToken,
+      refreshToken,
+    };
   }
 
-  async refreshToken(req: Request, res: Response): Promise<{ message: string, statusCode: number }> {
-    const refreshToken = req.cookies.REFRESH_TOKEN;
-    if (!refreshToken) throw new BadRequestException('리프레시 토큰이 없습니다.');
+  /**
+   * 사용자 로그아웃 처리
+   * @param res 응답 객체
+   * @returns 로그아웃 성공 메시지
+   */
+  async logout(res: Response, _user: SafeUser): Promise<{ message: string }> {
+    // 쿠키 삭제
+    res.clearCookie('ACCESS_TOKEN');
+    res.clearCookie('REFRESH_TOKEN');
+
+    return { message: '로그아웃 성공' };
+  }
+
+  /**
+   * 리프레시 토큰을 사용하여 새로운 액세스 토큰을 발급합니다.
+   * @param dto 리프레시 토큰 정보 DTO
+   * @returns 새로운 액세스 토큰과 성공 메시지
+   * @throws UnauthorizedException 리프레시 토큰이 없거나 유효하지 않은 경우
+   * @throws InternalServerErrorException JWT 비밀 키가 설정되어 있지 않은 경우
+   */
+  async refreshToken(dto: RefreshTokenAuthDto): Promise<{ message: string, accessToken: string, refreshToken: string }> {
+    const { refreshToken } = dto;
+    if (!refreshToken) throw new UnauthorizedException('리프레시 토큰이 없습니다.');
 
     try {
-      const payload = jwt.verify(refreshToken, this.getJwtSecret()) as any;
+      const payload = jwt.verify(refreshToken, this.getJwtSecret());
 
       const newAccessToken = jwt.sign({ sub: payload.sub }, this.getJwtSecret(), { expiresIn: "15m" });
+      const newRefreshToken = jwt.sign({ sub: payload.sub }, this.getJwtSecret(), { expiresIn: "7d" });
 
-      res.cookie('ACCESS_TOKEN', newAccessToken, {
-        httpOnly: true,
-        sameSite: 'lax',
-        secure: process.env.NODE_ENV === 'production',
-        maxAge: 1000 * 60 * 15, // 15분
-      });
-
-      return { message: '토큰 갱신 성공', statusCode: 200 };
-    } catch (error) {
-      console.error('[refreshToken error]', error);
-      throw new BadRequestException('리프레시 토큰이 유효하지 않습니다.');
+      return {
+        message: '토큰 재발급 성공',
+        accessToken: newAccessToken,
+        refreshToken: newRefreshToken,
+      };
+    } catch (_error) {
+      throw new UnauthorizedException('리프레시 토큰이 유효하지 않습니다.');
     }
+  }
+
+  /**
+   * 사용자 회원가입 처리
+   * @param dto 사용자 정보 DTO
+   * @returns 회원가입 성공 메시지
+   * @throws BadRequestException 사용자 정보가 유효하지 않은 경우
+   * @throws InternalServerErrorException JWT 비밀 키가 설정되어 있지 않은 경우
+   */
+  async register(dto: RegisterAuthDto): Promise<{ message: string }> {
+    const { id, pwd, confirmPwd, usePwd, name, nickname } = dto;
+
+    // 비밀번호 확인
+    if (pwd !== confirmPwd) throw new BadRequestException('비밀번호가 일치하지 않습니다.');
+
+    // 사용자 생성
+    const encodedPassword = Buffer.from(pwd).toString('base64');
+    await this.userService.create(new CreateUserDto({ id, pwd: encodedPassword, usePwd, name, nickname }));
+
+    return { message: '회원가입 성공' };
   }
 }
