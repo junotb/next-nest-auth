@@ -1,13 +1,14 @@
-import { Controller, Post, Body, Get, UseGuards, Res } from '@nestjs/common';
+import { Controller, Post, Body, Get, UseGuards, Res, BadRequestException } from '@nestjs/common';
 import { Response } from 'express';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { AuthService } from './auth.service';
-import { LoginAuthDto } from './dto/login-auth.dto';
+import { LoginRequestDto } from './dto/login-request.dto';
 import { User } from '../common/decorator/user.decorator';
 import { SafeUser } from '../common/type/safe-user.type';
-import { RefreshTokenAuthDto } from './dto/refresh-token-auth.dto';
-import { RegisterAuthDto } from './dto/register-auth.dto';
+import { RefreshRequestDto } from './dto/refresh-request.dto';
+import { RegisterRequestDto } from './dto/register-request.dto';
 import { ApiBearerAuth } from '@nestjs/swagger';
+import { UpdateRequestDto } from './dto/update-request.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -25,7 +26,7 @@ export class AuthController {
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @Get('me')
-  getProfile(@User() user: SafeUser) {
+  me(@User() user: SafeUser) {
     return user;
   }
 
@@ -43,7 +44,7 @@ export class AuthController {
    * }
    */
   @Post('login')
-  login(@Body() dto: LoginAuthDto) {
+  login(@Body() dto: LoginRequestDto) {
     return this.authService.login(dto);
   }
 
@@ -75,7 +76,7 @@ export class AuthController {
    * }
    */
   @Post('refresh')
-  refreshToken(@Body() dto: RefreshTokenAuthDto) {
+  refreshToken(@Body() dto: RefreshRequestDto) {
     return this.authService.refreshToken(dto);
   }
 
@@ -97,7 +98,27 @@ export class AuthController {
    * }
    */
   @Post('register')
-  async register(@Body() dto: RegisterAuthDto) {
+  async register(@Body() dto: RegisterRequestDto) {
     return this.authService.register(dto);
+  }
+
+  /**
+   * 사용자 정보 수정
+   * @param dto 사용자 정보 DTO
+   * @return 사용자 정보 수정 성공 메시지와 상태 코드
+   * @throws BadRequestException 사용자 정보가 유효하지 않은 경우
+   * @throws InternalServerErrorException JWT 비밀 키가 설정되어 있지 않은 경우
+   * @example
+   * PUT /auth/update
+   * {
+   *  "idx": 1,
+   *  "nickname": "updatedNickname"
+   * }
+   */
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @Post('update')
+  async update(@Body() dto: UpdateRequestDto, @User() user: SafeUser) {
+    return this.authService.update(dto, user);
   }
 }

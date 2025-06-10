@@ -1,8 +1,9 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { User } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { User } from '@prisma/client';
+import { DeleteUserDto } from './dto/delete-user.dto';
 import { SafeUser } from 'src/common/type/safe-user.type';
 
 @Injectable()
@@ -27,7 +28,7 @@ export class UserService {
    * @returns 안전한 사용자 정보
    * @throws BadRequestException - 사용자가 이미 존재하는 경우
    */
-  async create(createUserDto: CreateUserDto) {
+  async create(createUserDto: CreateUserDto): Promise<SafeUser> {
     const { id, pwd, usePwd, name, nickname } = createUserDto;
 
     const exists = await this.prisma.user.findUnique({ where: { id } });
@@ -63,20 +64,18 @@ export class UserService {
    * @returns 사용자 정보
    * @throws NotFoundException - 사용자를 찾을 수 없는 경우
    */
-  async update(idx: number, updateUserDto: UpdateUserDto) {
-    const user = await this.prisma.user.findUnique({ where: { idx } });
-    if (!user) throw new NotFoundException('사용자를 찾을 수 없습니다.');
-
-    user.nickname = updateUserDto.nickname;
-    user.updateDate = Date.now();
+  async update(updateUserDto: UpdateUserDto): Promise<SafeUser> {
+    const { idx, nickname } = updateUserDto;
+    if (!idx) throw new BadRequestException('사용자 정보가 제공되지 않았습니다.');
 
     const updatedUser = await this.prisma.user.update({
       where: { idx },
       data: {
-        nickname: updateUserDto.nickname,
+        nickname,
         updateDate: new Date().getTime(),
       },
     });
+    if (!updatedUser) throw new NotFoundException('사용자를 찾을 수 없습니다.');
 
     return this.getSafeUser(updatedUser);
   }
@@ -87,12 +86,13 @@ export class UserService {
    * @returns 삭제 메시지와 상태 코드
    * @throws NotFoundException - 사용자를 찾을 수 없는 경우
    */
-  async remove(idx: number): Promise<{ message: string, statusCode: number }> {
-    const user = await this.prisma.user.findUnique({ where: { idx } });
-    if (!user) throw new NotFoundException('사용자를 찾을 수 없습니다.');
+  async remove(deleteUserDto: DeleteUserDto): Promise<SafeUser> {
+    const { idx } = deleteUserDto;
+    if (!idx) throw new BadRequestException('사용자 정보가 제공되지 않았습니다.');
 
-    await this.prisma.user.delete({ where: { idx } });
-    return { message: '사용자가 삭제되었습니다.', statusCode: 200 };
+    const deletedUser = await this.prisma.user.delete({ where: { idx } });
+    if (!deletedUser) throw new NotFoundException('사용자를 찾을 수 없습니다.');
+    return this.getSafeUser(deletedUser);
   }
 
   /**
