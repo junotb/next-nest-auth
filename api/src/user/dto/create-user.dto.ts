@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsEmail } from "class-validator";
+import { IsEmail, IsInt, Max, Min } from "class-validator";
 
 export class CreateUserDto {
   @IsEmail()
@@ -10,6 +10,9 @@ export class CreateUserDto {
   pwd: string;
   
   @ApiProperty({ example: "password123", description: "비밀번호 확인" })
+  @IsInt()
+  @Min(0)
+  @Max(1)
   usePwd: number;
 
   @ApiProperty({ example: "홍길동", description: "사용자 이름" })
