@@ -1,12 +1,17 @@
 import { BadRequestException, Injectable, InternalServerErrorException, UnauthorizedException } from '@nestjs/common';
-import { Request, Response } from 'express';
+import { Response } from 'express';
 import * as jwt from 'jsonwebtoken';
-import { LoginAuthDto } from './dto/login-auth.dto';
+import { LoginRequestDto } from './dto/login-request.dto';
+import { LoginResponseDto } from './dto/login-response.dto';
+import { LogoutResponseDto } from './dto/logout-response.dto';
+import { RefreshResponseDto } from './dto/refresh-response.dto';
+import { RefreshRequestDto } from './dto/refresh-request.dto';
+import { RegisterResponseDto } from './dto/register-response.dto';
+import { RegisterRequestDto } from './dto/register-request.dto';
+import { UpdateResponseDto } from './dto/update-response.dto';
+import { UpdateRequestDto } from './dto/update-request.dto';
 import { UserService } from '../user/user.service';
 import { SafeUser } from '../common/type/safe-user.type';
-import { RefreshTokenAuthDto } from './dto/refresh-token-auth.dto';
-import { RegisterAuthDto } from './dto/register-auth.dto';
-import { CreateUserDto } from 'src/user/dto/create-user.dto';
 
 @Injectable()
 export class AuthService {
@@ -24,12 +29,13 @@ export class AuthService {
 
   /**
    * 사용자 로그인 처리
-   * @param id 사용자 ID
-   * @param pwd 사용자 비밀번호
-   * @param res 응답 객체
+   * @param dto 로그인 요청 DTO
    * @returns 로그인 성공 메시지
+   * @throws BadRequestException 비밀번호가 일치하지 않는 경우
+   * @throws InternalServerErrorException JWT 비밀 키가 설정되어 있지 않은 경우
+   * @throws NotFoundException 사용자를 찾을 수 없는 경우
    */
-  async login(dto: LoginAuthDto): Promise<{ message: string, accessToken: string, refreshToken: string }> {
+  async login(dto: LoginRequestDto): Promise<LoginResponseDto> {
     const { id, pwd } = dto;
 
     // 사용자 조회
@@ -56,7 +62,7 @@ export class AuthService {
    * @param res 응답 객체
    * @returns 로그아웃 성공 메시지
    */
-  async logout(res: Response, _user: SafeUser): Promise<{ message: string }> {
+  async logout(res: Response, _user: SafeUser): Promise<LogoutResponseDto> {
     // 쿠키 삭제
     res.clearCookie('ACCESS_TOKEN');
     res.clearCookie('REFRESH_TOKEN');
@@ -71,7 +77,7 @@ export class AuthService {
    * @throws UnauthorizedException 리프레시 토큰이 없거나 유효하지 않은 경우
    * @throws InternalServerErrorException JWT 비밀 키가 설정되어 있지 않은 경우
    */
-  async refreshToken(dto: RefreshTokenAuthDto): Promise<{ message: string, accessToken: string, refreshToken: string }> {
+  async refreshToken(dto: RefreshRequestDto): Promise<RefreshResponseDto> {
     const { refreshToken } = dto;
     if (!refreshToken) throw new UnauthorizedException('리프레시 토큰이 없습니다.');
 
@@ -98,7 +104,7 @@ export class AuthService {
    * @throws BadRequestException 사용자 정보가 유효하지 않은 경우
    * @throws InternalServerErrorException JWT 비밀 키가 설정되어 있지 않은 경우
    */
-  async register(dto: RegisterAuthDto): Promise<{ message: string }> {
+  async register(dto: RegisterRequestDto): Promise<RegisterResponseDto> {
     const { id, pwd, confirmPwd, usePwd, name, nickname } = dto;
 
     // 비밀번호 확인
@@ -106,8 +112,22 @@ export class AuthService {
 
     // 사용자 생성
     const encodedPassword = Buffer.from(pwd).toString('base64');
-    await this.userService.create(new CreateUserDto({ id, pwd: encodedPassword, usePwd, name, nickname }));
+    await this.userService.create({ id, pwd: encodedPassword, usePwd, name, nickname });
 
     return { message: '회원가입 성공' };
+  }
+
+  /**
+   * 사용자 정보를 업데이트 합니다.
+   * @param dto 업데이트할 사용자 정보 DTO
+   * @param user 사용자 정보
+   * @return 업데이트 성공 메시지
+   * @throws BadRequestException 사용자 정보가 유효하지 않은 경우
+   * @throws InternalServerErrorException JWT 비밀 키가 설정되어 있지 않은 경우
+   */
+  async update(dto: UpdateRequestDto, user: SafeUser): Promise<UpdateResponseDto> {
+    const { idx } = user;
+    await this.userService.update({ ...dto, idx });
+    return { message: '사용자 정보가 업데이트 되었습니다.' };
   }
 }

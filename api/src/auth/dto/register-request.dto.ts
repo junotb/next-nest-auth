@@ -1,7 +1,7 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { IsEmail, IsInt, Max, Min } from "class-validator";
 
-export class RegisterAuthDto {
+export class RegisterRequestDto {
   @IsEmail()
   @ApiProperty({ example: 'user123@email.com', description: '사용자 아이디' })
   id: string;
@@ -23,4 +23,8 @@ export class RegisterAuthDto {
 
   @ApiProperty({ example: "홍길동", description: "사용자 닉네임" })
   nickname: string;
+
+  constructor(partial: Partial<RegisterRequestDto>) {
+    Object.assign(this, partial);
+  }
 }
