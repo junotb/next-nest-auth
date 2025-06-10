@@ -8,24 +8,26 @@ datasource db {
 }
 
 model User {
-  IDX                   Int      @id @default(autoincrement())
-  ID                    String      @unique
-  PWD                   String
-  USE_PWD               Int
-  NAME                  String
-  NICK_NAME             String
-  CREATE_DATE           Int
-  UPDATE_DATE           Int
-  LAST_LOGIN_DATE       Int?
+  idx                   Int         @id                       @default(autoincrement())   @map("IDX")
+  id                    String      @unique                   @map("ID")
+  pwd                   String      @map("PWD")
+  usePwd                Int         @map("USE_PWD")
+  name                  String      @map("NAME")
+  nickname              String      @map("NICK_NAME")
+  createDate            Int         @map("CREATE_DATE")
+  updateDate            Int         @map("UPDATE_DATE")
+  lastLoginDate         Int?        @map("LAST_LOGIN_DATE")
+
   @@map("USER")
 }
 
 model SocialUser {
-  IDX                   Int      @id @default(autoincrement())
-  USER_IDX              Int      @unique
-  PROVIDER              String
-  PROVIDER_ACCOUNT_ID   String      @unique
-  TOKEN_TYPE            String
-  TYPE                  String
+  idx                   Int         @id                       @default(autoincrement())   @map("IDX")
+  userIdx               Int         @unique                   @map("USER_IDX")
+  provider              String      @map("PROVIDER")
+  providerAccountId     String      @unique                   @map("PROVIDER_ACCOUNT_ID")
+  tokenType             String      @map("TOKEN_TYPE")
+  type                  String      @map("TYPE")
+
   @@map("SOCIAL_USER")
 }
