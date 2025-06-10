@@ -1,27 +1,103 @@
-import { Controller, Post, Body, Get, Res, UseGuards, Req, BadRequestException } from '@nestjs/common';
+import { Controller, Post, Body, Get, UseGuards, Res } from '@nestjs/common';
 import { Response } from 'express';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { AuthService } from './auth.service';
-import { SignInAuthDto } from './dto/signin-auth.dto';
+import { LoginAuthDto } from './dto/login-auth.dto';
+import { User } from '../common/decorator/user.decorator';
+import { SafeUser } from '../common/type/safe-user.type';
+import { RefreshTokenAuthDto } from './dto/refresh-token-auth.dto';
+import { RegisterAuthDto } from './dto/register-auth.dto';
+import { ApiBearerAuth } from '@nestjs/swagger';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @Get('me')
+  /**
+   * 사용자 프로필 조회
+   * @returns 사용자 정보
+   * @throws UnauthorizedException 인증되지 않은 사용자 접근 시
+   * @throws InternalServerErrorException JWT 비밀 키가 설정되어 있지 않은 경우
+   * @example
+   * GET /auth/me
+   * {}
+   */
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
-  getProfile(@Req() req: any) {
-    return req.user;
+  @Get('me')
+  getProfile(@User() user: SafeUser) {
+    return user;
   }
 
+  /**
+   * 사용자 로그인 처리
+   * @param dto 로그인 정보 DTO
+   * @return 로그인 성공 메시지와 토큰 정보
+   * @throws BadRequestException 사용자 정보가 없거나 비밀번호가 일치하지 않는 경우
+   * @throws InternalServerErrorException JWT 비밀 키가 설정되어 있지 않은 경우
+   * @example
+   * POST /auth/login
+   * {
+   *  "id": "user123",
+   *  "pwd": "password123"
+   * }
+   */
   @Post('login')
-  signIn(
-    @Body() dto: SignInAuthDto,
-    @Res({ passthrough: true }) res: Response
-  ) {
-    const { id, pwd } = dto;
-    if (!id || !pwd) throw new BadRequestException('이메일과 비밀번호를 입력해주세요.');
+  login(@Body() dto: LoginAuthDto) {
+    return this.authService.login(dto);
+  }
 
-    return this.authService.login(id, pwd, res);
+  /**
+   * 사용자 로그아웃 처리
+   * @return 로그아웃 성공 메시지와 상태 코드
+   * @throws UnauthorizedException 인증되지 않은 사용자 접근 시
+   * @throws InternalServerErrorException JWT 비밀 키가 설정되어 있지 않은 경우
+   * @example
+   * POST /auth/logout
+   * {}
+   */
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @Post('logout')
+  logout(@Res({ passthrough: true }) res: Response, @User() user: SafeUser) {
+    return this.authService.logout(res, user);
+  }
+
+  /**
+   * 토큰 재발급 처리
+   * @return 새로 발급된 토큰 정보
+   * @throws UnauthorizedException 인증되지 않은 사용자 접근 시
+   * @throws InternalServerErrorException JWT 비밀 키가 설정되어 있지 않은 경우
+   * @example
+   * POST /auth/refresh
+   * {
+   *  "refreshToken": "your-refresh-token"
+   * }
+   */
+  @Post('refresh')
+  refreshToken(@Body() dto: RefreshTokenAuthDto) {
+    return this.authService.refreshToken(dto);
+  }
+
+  /**
+   * 사용자 회원가입 처리
+   * @param dto 사용자 정보 DTO
+   * @return 회원가입 성공 메시지와 상태 코드
+   * @throws BadRequestException 사용자 정보가 유효하지 않은 경우
+   * @throws InternalServerErrorException JWT 비밀 키가 설정되어 있지 않은 경우
+   * @example
+   * POST /auth/register
+   * {
+   *  "id": "newuser",
+   *  "pwd": "newpassword",
+   *  "confirmPwd": "newpassword",
+   *  "usePwd": 1,
+   *  "name": "New User",
+   *  "nickname": "newuser123"
+   * }
+   */
+  @Post('register')
+  async register(@Body() dto: RegisterAuthDto) {
+    return this.authService.register(dto);
   }
 }
