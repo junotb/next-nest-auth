@@ -13,6 +13,9 @@ export class RegisterAuthDto {
   confirmPwd: string;
 
   @ApiProperty({ example: 1, description: "비밀번호 사용 여부 (1: 사용, 0: 사용 안함)" })
+  @IsInt()
+  @Min(0)
+  @Max(1)
   usePwd: number;
 
   @ApiProperty({ example: "홍길동", description: "사용자 이름" })
