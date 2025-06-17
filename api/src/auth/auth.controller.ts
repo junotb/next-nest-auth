@@ -111,7 +111,6 @@ export class AuthController {
    * @example
    * PUT /auth/update
    * {
-   *  "idx": 1,
    *  "nickname": "updatedNickname"
    * }
    */
@@ -120,5 +119,21 @@ export class AuthController {
   @Post('update')
   async update(@Body() dto: UpdateRequestDto, @User() user: SafeUser) {
     return this.authService.update(dto, user);
+  }
+
+  /**
+   * 사용자 회원탈퇴 처리
+   * @param dto 사용자 정보 DTO
+   * @return 회원탈퇴 성공 메시지와 상태 코드
+   * @throws BadRequestException 사용자 정보가 유효하지 않은 경우
+   * @throws InternalServerErrorException JWT 비밀 키가 설정되어 있지 않은 경우
+   * @example
+   * DELETE /auth/delete
+   */
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @Post('delete')
+  async delete(@User() user: SafeUser) {
+    return this.authService.delete(user);
   }
 }

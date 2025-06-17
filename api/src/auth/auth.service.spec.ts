@@ -19,6 +19,7 @@ describe('AuthService', () => {
       findById: jest.fn(),
       create: jest.fn(),
       update: jest.fn(),
+      delete: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -185,6 +186,25 @@ describe('AuthService', () => {
       userService.update!.mockResolvedValue(user);
       const result = await authService.update(dto, user);
       expect(result).toEqual({ message: '사용자 정보가 업데이트 되었습니다.' });
+    });
+  });
+
+  describe('delete', () => {
+    it('should delete user and return success message', async () => {
+      const user = {
+        idx: 1,
+        id: 'user123',
+        name: 'Test User',
+        nickname: 'testuser',
+        usePwd: true,
+        createDate: new Date().getTime(),
+        updateDate: new Date().getTime(),
+        lastLoginDate: new Date().getTime(),
+      };
+
+      userService.delete!.mockResolvedValue(user);
+      const result = await authService.delete(user);
+      expect(result).toEqual({ message: '사용자 정보가 삭제되었습니다.' });
     });
   });
 });
