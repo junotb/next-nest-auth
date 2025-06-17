@@ -86,7 +86,7 @@ export class UserService {
    * @returns 삭제 메시지와 상태 코드
    * @throws NotFoundException - 사용자를 찾을 수 없는 경우
    */
-  async remove(deleteUserDto: DeleteUserDto): Promise<SafeUser> {
+  async delete(deleteUserDto: DeleteUserDto): Promise<SafeUser> {
     const { idx } = deleteUserDto;
     if (!idx) throw new BadRequestException('사용자 정보가 제공되지 않았습니다.');
 

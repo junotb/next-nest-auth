@@ -130,4 +130,17 @@ export class AuthService {
     await this.userService.update({ ...dto, idx });
     return { message: '사용자 정보가 업데이트 되었습니다.' };
   }
+
+  /**
+   * 사용자 정보를 삭제 합니다.
+   * @param user 사용자 정보
+   * @return 삭제 성공 메시지
+   * @throws BadRequestException 사용자 정보가 유효하지 않은 경우
+   * @throws InternalServerErrorException JWT 비밀 키가 설정되어 있지 않은 경우
+   */
+  async delete(user: SafeUser): Promise<{ message: string }> {
+    const { idx } = user;
+    await this.userService.delete({ idx });
+    return { message: '사용자 정보가 삭제되었습니다.' };
+  }
 }
