@@ -77,7 +77,7 @@ describe('AuthService', () => {
       await expect(authService.login({ id: 'user123', pwd: 'wrongPassword' })).rejects.toThrow(BadRequestException);
     });
 
-    it('JWT 비밀키가 설정되어 있지 않으면 InternalServerErrorException을 던져야 합니다.', () => {
+    it('JWT 비밀키가 설정되어 있지 않으면 InternalServerErrorException을 던져야 합니다.', async () => {
       const dto: LoginRequestDto = { id: 'user123@email.com', pwd: 'password123' };
       userService.findById!.mockResolvedValue({
         id: dto.id,
@@ -106,7 +106,7 @@ describe('AuthService', () => {
         createDate: new Date().getTime(),
         updateDate: new Date().getTime(),
         lastLoginDate: new Date().getTime(),
-      }; // Mock user object
+      }; // Mock 사용자 객체
 
       const result = await authService.logout(res, user);
       expect(res.clearCookie).toHaveBeenCalledWith('ACCESS_TOKEN');
