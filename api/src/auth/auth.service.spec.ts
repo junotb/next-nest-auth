@@ -33,31 +33,31 @@ describe('AuthService', () => {
     }).compile();
 
     authService = module.get<AuthService>(AuthService);
-    process.env.JWT_SECRET = 'test-secret'; // Mock JWT secret for testing
+    process.env.JWT_SECRET = 'test-secret'; // Mock JWT 비밀키
   });
 
-  it('should be defined', () => {
+  it('정의되어야 합니다.', () => {
     expect(authService).toBeDefined();
   });
 
   describe('getJwtSecret', () => {
-    it('should return JWT secret from environment variables', () => {
+    it('JWT 비밀키를 반환해야 합니다.', () => {
       const secret = authService['getJwtSecret']();
       expect(secret).toBe('test-secret');
     });
 
-    it('should throw InternalServerErrorException if JWT secret is not set', () => {
-      delete process.env.JWT_SECRET; // Remove JWT secret to trigger error
+    it('JWT 비밀키가 설정되어 있지 않으면 InternalServerErrorException을 던져야 합니다.', () => {
+      delete process.env.JWT_SECRET; // JWT 삭제하여 트리거 에러 발생
       expect(() => authService['getJwtSecret']()).toThrow(InternalServerErrorException);
     });
   });
 
   describe('login', () => {
-    it('should return login response with access and refresh tokens', async () => {
+    it('로그인 응답을 반환해야 합니다.', async () => {
       const dto: LoginRequestDto = { id: 'user123@email.com', pwd: 'password123' };
       userService.findById!.mockResolvedValue({
         id: dto.id,
-        pwd: Buffer.from(dto.pwd).toString('base64'), // Mock encoded password
+        pwd: Buffer.from(dto.pwd).toString('base64'), // Mock 암호화된 비밀번호
       });
 
       (jwt.sign as jest.Mock)
@@ -72,22 +72,22 @@ describe('AuthService', () => {
       });
     });
 
-    it('should throw BadRequestException if password does not match', async () => {
+    it('비밀번호가 일치하지 않으면 BadRequestException을 던져야 합니다.', async () => {
       userService.findById!.mockResolvedValue({ pwd: 'wrongPassword' });
       await expect(authService.login({ id: 'user123', pwd: 'wrongPassword' })).rejects.toThrow(BadRequestException);
     });
 
-    it('should throw InternalServerErrorException if JWT secret is not set', async () => {
+    it('JWT 비밀키가 설정되어 있지 않으면 InternalServerErrorException을 던져야 합니다.', () => {
       const dto: LoginRequestDto = { id: 'user123@email.com', pwd: 'password123' };
       userService.findById!.mockResolvedValue({
         id: dto.id,
-        pwd: Buffer.from(dto.pwd).toString('base64'), // Mock encoded password
+        pwd: Buffer.from(dto.pwd).toString('base64'), // Mock 암호화된 비밀번호
       });
-      delete process.env.JWT_SECRET; // Remove JWT secret to trigger error
+      delete process.env.JWT_SECRET; // JWT 삭제하여 트리거 에러 발생
       await expect(authService.login({ id: 'user123', pwd: 'password123' })).rejects.toThrow(InternalServerErrorException);
     });
 
-    it('should throw NotFoundException if user does not exist', async () => {
+    it('사용자가 존재하지 않으면 NotFoundException을 던져야 합니다.', async () => {
       const dto: LoginRequestDto = { id: 'wrongid@email.com', pwd: 'password123' };
       userService.findById!.mockRejectedValue(new NotFoundException('사용자를 찾을 수 없습니다.'));
       await expect(authService.login(dto)).rejects.toThrow(new NotFoundException('사용자를 찾을 수 없습니다.'));
@@ -95,8 +95,8 @@ describe('AuthService', () => {
   });
 
   describe('logout', () => {
-    it('should clear cookies and return logout message', async () => {
-      const res = { clearCookie: jest.fn() } as any; // Mock response object
+    it('쿠키를 삭제하고 로그아웃 성공 메시지를 반환해야 합니다.', async () => {
+      const res = { clearCookie: jest.fn() } as any; // Mock 응답 객체
       const user = {
         idx: 1,
         id: 'user123',
@@ -116,10 +116,10 @@ describe('AuthService', () => {
   });
 
   describe('refreshToken', () => {
-    it('should return new access token and success message', async () => {
+    it('토큰을 재발급하고 성공 메시지를 반환해야 합니다.', async () => {
       const dto: RefreshRequestDto = { refreshToken: 'validRefreshToken' };
 
-      (jwt.verify as jest.Mock).mockReturnValue({ sub: 1 }); // Mock JWT verification
+      (jwt.verify as jest.Mock).mockReturnValue({ sub: 1 }); // Mock JWT 검증
       (jwt.sign as jest.Mock)
         .mockReturnValueOnce('newAccessToken')
         .mockReturnValueOnce('newRefreshToken');
@@ -134,7 +134,7 @@ describe('AuthService', () => {
   });
 
   describe('register', () => {
-    it('should create a new user and return safe user data', async () => {
+    it('새 사용자를 등록하고 성공 메시지를 반환해야 합니다.', async () => {
       const dto: RegisterRequestDto = {
         id: 'user123',
         pwd: 'password123',
@@ -156,7 +156,7 @@ describe('AuthService', () => {
       expect(result).toEqual({ message: '회원가입 성공' });
     });
 
-    it('should throw BadRequestException if passwords do not match', async () => {
+    it('비밀번호가 일치하지 않으면 BadRequestException을 던져야 합니다.', async () => {
       const dto: RegisterRequestDto = {
         id: 'user123',
         pwd: 'password123',
@@ -170,7 +170,7 @@ describe('AuthService', () => {
   });
 
   describe('update', () => {
-    it('should update user information and return safe user data', async () => {
+    it('사용자를 업데이트하고 성공 메시지를 반환해야 합니다.', async () => {
       const dto: UpdateRequestDto = { nickname: 'updatedNickname' };
       const user = {
         idx: 1,
@@ -190,7 +190,7 @@ describe('AuthService', () => {
   });
 
   describe('delete', () => {
-    it('should delete user and return success message', async () => {
+    it('사용자를 삭제하고 성공 메시지를 반환해야 합니다.', async () => {
       const user = {
         idx: 1,
         id: 'user123',
