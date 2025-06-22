@@ -10,30 +10,37 @@ import DeleteCard from "@/components/cards/DeleteCard";
 import { SignUpSchemaType } from "@/schemas/SignUpSchema";
 import { LoginSchemaType } from "@/schemas/LoginSchema";
 import { UpdateSchemaType } from "@/schemas/UpdateSchema";
+import api from "@/libs/axios";
 
 export default function Home() {
-  const onSignUpSubmit = (signUpSchema: SignUpSchemaType): void => {
-    console.log(signUpSchema);
+  const onSignUpSubmit = ({ id, pwd, name, nickname }: SignUpSchemaType): void => {
+    const data = api.post("/auth/signup", { id, pwd, name, nickname });
+    console.log(data);
   };
 
-  const onLoginSubmit = (loginSchema: LoginSchemaType): void => {
-    console.log(loginSchema);
+  const onLoginSubmit = async ({ id, pwd }: LoginSchemaType): Promise<void> => {
+    const data = await api.post("/auth/login", { id, pwd });
+    console.log(data);
   };
 
   const onProfileSubmit = (): void => {
-    throw new Error("Function not implemented.");
+    const data = api.get("/auth/profile");
+    console.log(data);
   };
 
   const onRefreshSubmit = (): void => {
-    throw new Error("Function not implemented.");
+    const data = api.post("/auth/refresh");
+    console.log(data);
   };
 
-  const onUpdateSubmit = (UpdateSchema: UpdateSchemaType): void => {
-    console.log(UpdateSchema);
+  const onUpdateSubmit = ({ nickname }: UpdateSchemaType): void => {
+    const data = api.put("/auth/update", { nickname });
+    console.log(data);
   };
 
   const onDeleteSubmit = (): void => {
-    throw new Error("Function not implemented.");
+    const data = api.delete("/auth/delete");
+    console.log(data);
   }
 
   return (
