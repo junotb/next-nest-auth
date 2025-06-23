@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Get, UseGuards, Res, HttpCode } from '@nestjs/common';
+import { Controller, Post, Body, Get, UseGuards, Res, HttpCode, Put, Delete } from '@nestjs/common';
 import { Response } from 'express';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { AuthService } from './auth.service';
@@ -168,7 +168,7 @@ export class AuthController {
    */
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
-  @Post('update')
+  @Put('update')
   @HttpCode(200)
   async update(@Body() dto: UpdateRequestDto, @User() user: SafeUser) {
     return this.authService.update(dto, user);
@@ -185,7 +185,7 @@ export class AuthController {
    */
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
-  @Post('delete')
+  @Delete('delete')
   @HttpCode(204)
   async delete(@User() user: SafeUser) {
     await this.authService.delete(user);
