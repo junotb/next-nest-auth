@@ -1,13 +1,11 @@
 import { BadRequestException, Injectable, InternalServerErrorException, UnauthorizedException } from '@nestjs/common';
-import { Response } from 'express';
 import * as jwt from 'jsonwebtoken';
 import { LoginRequestDto } from './dto/login-request.dto';
 import { LoginResponseDto } from './dto/login-response.dto';
-import { LogoutResponseDto } from './dto/logout-response.dto';
 import { RefreshResponseDto } from './dto/refresh-response.dto';
 import { RefreshRequestDto } from './dto/refresh-request.dto';
-import { RegisterResponseDto } from './dto/register-response.dto';
-import { RegisterRequestDto } from './dto/register-request.dto';
+import { SignUpResponseDto } from './dto/signup-response.dto';
+import { SignUpRequestDto } from './dto/signup-request.dto';
 import { UpdateResponseDto } from './dto/update-response.dto';
 import { UpdateRequestDto } from './dto/update-request.dto';
 import { UserService } from '../user/user.service';
@@ -30,7 +28,7 @@ export class AuthService {
   /**
    * 사용자 로그인 처리
    * @param dto 로그인 요청 DTO
-   * @returns 로그인 성공 메시지
+   * @returns 토큰
    * @throws BadRequestException 비밀번호가 일치하지 않는 경우
    * @throws InternalServerErrorException JWT 비밀 키가 설정되어 있지 않은 경우
    * @throws NotFoundException 사용자를 찾을 수 없는 경우
@@ -51,23 +49,9 @@ export class AuthService {
     const refreshToken = jwt.sign(payload, this.getJwtSecret(), { expiresIn: "7d" });
 
     return {
-      message: '로그인 성공',
       accessToken,
       refreshToken,
     };
-  }
-
-  /**
-   * 사용자 로그아웃 처리
-   * @param res 응답 객체
-   * @returns 로그아웃 성공 메시지
-   */
-  async logout(res: Response, _user: SafeUser): Promise<LogoutResponseDto> {
-    // 쿠키 삭제
-    res.clearCookie('ACCESS_TOKEN');
-    res.clearCookie('REFRESH_TOKEN');
-
-    return { message: '로그아웃 성공' };
   }
 
   /**
@@ -77,7 +61,7 @@ export class AuthService {
    * @throws UnauthorizedException 리프레시 토큰이 없거나 유효하지 않은 경우
    * @throws InternalServerErrorException JWT 비밀 키가 설정되어 있지 않은 경우
    */
-  async refreshToken(dto: RefreshRequestDto): Promise<RefreshResponseDto> {
+  async refresh(dto: RefreshRequestDto): Promise<RefreshResponseDto> {
     const { refreshToken } = dto;
     if (!refreshToken) throw new UnauthorizedException('리프레시 토큰이 없습니다.');
 
@@ -88,7 +72,6 @@ export class AuthService {
       const newRefreshToken = jwt.sign({ sub: payload.sub }, this.getJwtSecret(), { expiresIn: "7d" });
 
       return {
-        message: '토큰 재발급 성공',
         accessToken: newAccessToken,
         refreshToken: newRefreshToken,
       };
@@ -104,7 +87,7 @@ export class AuthService {
    * @throws BadRequestException 사용자 정보가 유효하지 않은 경우
    * @throws InternalServerErrorException JWT 비밀 키가 설정되어 있지 않은 경우
    */
-  async register(dto: RegisterRequestDto): Promise<RegisterResponseDto> {
+  async signup(dto: SignUpRequestDto): Promise<SignUpResponseDto> {
     const { id, pwd, confirmPwd, usePwd, name, nickname } = dto;
 
     // 비밀번호 확인
@@ -112,9 +95,9 @@ export class AuthService {
 
     // 사용자 생성
     const encodedPassword = Buffer.from(pwd).toString('base64');
-    await this.userService.create({ id, pwd: encodedPassword, usePwd, name, nickname });
+    const user = await this.userService.create({ id, pwd: encodedPassword, usePwd, name, nickname });
 
-    return { message: '회원가입 성공' };
+    return { user };
   }
 
   /**
