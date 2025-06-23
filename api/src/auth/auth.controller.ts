@@ -53,7 +53,7 @@ export class AuthController {
     const { accessToken, refreshToken } = await this.authService.login(dto);
 
     // 쿠키에 토큰 저장
-    res.cookie('accessToken', accessToken, {
+    res.cookie('accesstoken', accessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
@@ -87,7 +87,7 @@ export class AuthController {
   @Post('logout')
   @HttpCode(204)
   logout(@Res({ passthrough: true }) res: Response, @User() user: SafeUser) {
-    res.clearCookie('accessToken');
+    res.clearCookie('accesstoken');
     res.clearCookie('refreshToken');
   }
 
@@ -111,7 +111,7 @@ export class AuthController {
     const { accessToken, refreshToken } = await this.authService.refresh(dto);
 
     // 쿠키에 새 토큰 저장
-    res.cookie('accessToken', accessToken, {
+    res.cookie('accesstoken', accessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
@@ -119,7 +119,7 @@ export class AuthController {
     });
 
     // 쿠키에 새 리프레시 토큰 저장
-    res.cookie('refreshToken', refreshToken, {
+    res.cookie('refreshtoken', refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
