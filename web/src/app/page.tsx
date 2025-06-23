@@ -6,13 +6,14 @@ import LoginCard from "@/components/cards/LoginCard";
 import ProfileCard from "@/components/cards/ProfileCard";
 import RefreshCard from "@/components/cards/RefreshCard";
 import UpdateCard from "@/components/cards/UpdateCard";
+import LogoutCard from "@/components/cards/LogoutCard";
 import DeleteCard from "@/components/cards/DeleteCard";
+import { useToast } from "@/hooks/useToast";
+import api from "@/libs/axios";
 import { SignUpSchemaType } from "@/schemas/SignUpSchema";
 import { LoginSchemaType } from "@/schemas/LoginSchema";
 import { UpdateSchemaType } from "@/schemas/UpdateSchema";
-import api from "@/libs/axios";
 import { useAuthStore } from "@/stores/useAuthStore";
-import { useToast } from "@/hooks/useToast";
 
 export default function Home() {
   const setAccessToken = useAuthStore((state) => state.setAccessToken);
@@ -85,11 +86,25 @@ export default function Home() {
     }
   };
 
+  const onLogoutSubmit = async (): Promise<void> => {
+    try {
+      await api.post("/auth/logout");
+      setAccessToken("");
+      showToast("로그아웃 성공");
+    } catch (error) {
+      if (error instanceof Error) {
+        showToast(error.message);
+      } else {
+        showToast("로그아웃 실패");
+      }
+    }
+  };
+
   const onDeleteSubmit = async (): Promise<void> => {
     try {
       await api.delete("/auth/delete");
-      showToast("회원 탈퇴 성공");
       setAccessToken("");
+      showToast("회원 탈퇴 성공");
     } catch (error) {
       if (error instanceof Error) {
         showToast(error.message);
@@ -125,6 +140,10 @@ export default function Home() {
 
           <article>
             <UpdateCard onSubmit={onUpdateSubmit} />
+          </article>
+
+          <article>
+            <LogoutCard onSubmit={onLogoutSubmit} />
           </article>
           
           <article>
