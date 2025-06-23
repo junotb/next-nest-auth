@@ -14,7 +14,7 @@ export default function CardLayout({ title, children }: CardLayoutProps) {
   const handleToggle = () => setIsOpen((prev) => !prev);
 
   return (
-    <div className="p-4 space-y-4 rounded-lg shadow hover:shadow-md transition cursor-pointer">
+    <div className="p-4 space-y-4 rounded-lg shadow hover:shadow transition cursor-pointer">
       <div
         onClick={handleToggle}
         className="flex items-center justify-between"

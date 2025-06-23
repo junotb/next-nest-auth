@@ -81,8 +81,6 @@ export class AuthController {
    * POST /auth/logout
    * {}
    */
-  @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
   @Post('logout')
   @HttpCode(204)
   logout(@Res({ passthrough: true }) res: Response) {
