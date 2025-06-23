@@ -1,5 +1,4 @@
 export class RefreshResponseDto {
-  message: string;
   accessToken: string;
   refreshToken: string;
 

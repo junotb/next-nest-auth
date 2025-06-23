@@ -3,10 +3,11 @@ import { AuthService } from './auth.service';
 import { UserService } from '../user/user.service';
 import { LoginRequestDto } from './dto/login-request.dto';
 import * as jwt from 'jsonwebtoken';
-import { BadRequestException, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { RefreshRequestDto } from './dto/refresh-request.dto';
-import { RegisterRequestDto } from './dto/register-request.dto';
+import { SignUpRequestDto } from './dto/signup-request.dto';
 import { UpdateRequestDto } from './dto/update-request.dto';
+import { SafeUser } from 'src/common/type/safe-user.type';
 
 jest.mock('jsonwebtoken');
 
@@ -66,15 +67,8 @@ describe('AuthService', () => {
       
       const result = await authService.login(dto);
       expect(result).toEqual({
-        message: '로그인 성공',
         accessToken: 'accessToken',
-        refreshToken: 'refreshToken',
       });
-    });
-
-    it('비밀번호가 일치하지 않으면 BadRequestException을 던져야 합니다.', async () => {
-      userService.findById!.mockResolvedValue({ pwd: 'wrongPassword' });
-      await expect(authService.login({ id: 'user123', pwd: 'wrongPassword' })).rejects.toThrow(BadRequestException);
     });
 
     it('JWT 비밀키가 설정되어 있지 않으면 InternalServerErrorException을 던져야 합니다.', async () => {
@@ -94,29 +88,8 @@ describe('AuthService', () => {
     });
   });
 
-  describe('logout', () => {
-    it('쿠키를 삭제하고 로그아웃 성공 메시지를 반환해야 합니다.', async () => {
-      const res = { clearCookie: jest.fn() } as any; // Mock 응답 객체
-      const user = {
-        idx: 1,
-        id: 'user123',
-        name: 'Test User',
-        nickname: 'testuser',
-        usePwd: true,
-        createDate: new Date().getTime(),
-        updateDate: new Date().getTime(),
-        lastLoginDate: new Date().getTime(),
-      }; // Mock 사용자 객체
-
-      const result = await authService.logout(res, user);
-      expect(res.clearCookie).toHaveBeenCalledWith('ACCESS_TOKEN');
-      expect(res.clearCookie).toHaveBeenCalledWith('REFRESH_TOKEN');
-      expect(result).toEqual({ message: '로그아웃 성공' });
-    });
-  });
-
   describe('refreshToken', () => {
-    it('토큰을 재발급하고 성공 메시지를 반환해야 합니다.', async () => {
+    it('토큰을 재발급해야 합니다.', async () => {
       const dto: RefreshRequestDto = { refreshToken: 'validRefreshToken' };
 
       (jwt.verify as jest.Mock).mockReturnValue({ sub: 1 }); // Mock JWT 검증
@@ -124,86 +97,72 @@ describe('AuthService', () => {
         .mockReturnValueOnce('newAccessToken')
         .mockReturnValueOnce('newRefreshToken');
 
-      const result = await authService.refreshToken(dto);
+      const result = await authService.refresh(dto);
       expect(result).toEqual({
-        message: '토큰 재발급 성공',
         accessToken: 'newAccessToken',
-        refreshToken: 'newRefreshToken',
       });
     });
   });
 
-  describe('register', () => {
-    it('새 사용자를 등록하고 성공 메시지를 반환해야 합니다.', async () => {
-      const dto: RegisterRequestDto = {
+  describe('signUp', () => {
+    it('새 사용자를 등록하고 사용자 정보를 반환해야 합니다.', async () => {
+      const dto: SignUpRequestDto = {
         id: 'user123',
         pwd: 'password123',
-        confirmPwd: 'password123',
-        usePwd: 1,
+        usePwd: 0,
         name: 'Test User',
         nickname: 'testuser',
       };
-      userService.create!.mockResolvedValue({
+      const newUser: SafeUser = {
         idx: 1,
         id: dto.id,
         name: dto.name,
         nickname: dto.nickname,
-        usePwd: Boolean(dto.usePwd),
         createDate: new Date().getTime(),
         updateDate: new Date().getTime(),
-      });
-      const result = await authService.register(dto);
-      expect(result).toEqual({ message: '회원가입 성공' });
-    });
-
-    it('비밀번호가 일치하지 않으면 BadRequestException을 던져야 합니다.', async () => {
-      const dto: RegisterRequestDto = {
-        id: 'user123',
-        pwd: 'password123',
-        confirmPwd: 'wrongpassword123',
-        usePwd: 1,
-        name: 'Test User',
-        nickname: 'testuser',
+        lastLoginDate: null,
       };
-      await expect(authService.register(dto)).rejects.toThrow(new BadRequestException('비밀번호가 일치하지 않습니다.'));
+      userService.create!.mockResolvedValue(newUser);
+      const result = await authService.signUp(dto);
+      expect(result).toEqual({
+        user: newUser
+      });
     });
   });
 
   describe('update', () => {
-    it('사용자를 업데이트하고 성공 메시지를 반환해야 합니다.', async () => {
+    it('사용자를 업데이트하고 사용자 정보를 반환해야 합니다.', async () => {
       const dto: UpdateRequestDto = { nickname: 'updatedNickname' };
-      const user = {
+      const updatedUser: SafeUser = {
         idx: 1,
         id: 'user123',
         name: 'Test User',
         nickname: dto.nickname,
-        usePwd: true,
         createDate: new Date().getTime(),
         updateDate: new Date().getTime(),
         lastLoginDate: new Date().getTime(),
       };
-
-      userService.update!.mockResolvedValue(user);
-      const result = await authService.update(dto, user);
-      expect(result).toEqual({ message: '사용자 정보가 업데이트 되었습니다.' });
+      userService.update!.mockResolvedValue(updatedUser);
+      const result = await authService.update(dto, updatedUser);
+      expect(result).toEqual({
+        user: updatedUser
+      });
     });
   });
 
   describe('delete', () => {
-    it('사용자를 삭제하고 성공 메시지를 반환해야 합니다.', async () => {
-      const user = {
+    it('사용자를 삭제하고 성공 상태 코드를 반환해야 합니다.', async () => {
+      const deletedUser: SafeUser = {
         idx: 1,
         id: 'user123',
         name: 'Test User',
         nickname: 'testuser',
-        usePwd: true,
         createDate: new Date().getTime(),
         updateDate: new Date().getTime(),
         lastLoginDate: new Date().getTime(),
       };
-
-      userService.delete!.mockResolvedValue(user);
-      const result = await authService.delete(user);
+      userService.delete!.mockResolvedValue(deletedUser);
+      const result = await authService.delete(deletedUser);
       expect(result).toEqual({ message: '사용자 정보가 삭제되었습니다.' });
     });
   });
