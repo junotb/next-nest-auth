@@ -87,7 +87,7 @@ export class AuthService {
    * @throws BadRequestException 사용자 정보가 유효하지 않은 경우
    * @throws InternalServerErrorException JWT 비밀 키가 설정되어 있지 않은 경우
    */
-  async signup(dto: SignUpRequestDto): Promise<SignUpResponseDto> {
+  async signUp(dto: SignUpRequestDto): Promise<SignUpResponseDto> {
     const { id, pwd, usePwd, name, nickname } = dto;
 
     // 사용자 생성
