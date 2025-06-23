@@ -30,7 +30,7 @@ export default function LoginCard({ onSubmit }: LoginCardProps) {
           <label htmlFor="id" className="block text-sm font-medium text-gray-700">아이디</label>
           <input
             type="email"
-            className={clsx("mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500", {
+            className={clsx("mt-1 block w-full border-gray-300 rounded-md shadow focus:border-blue-500 focus:ring-blue-500", {
               "border-red-500": errors.id,
             })}
             placeholder="아이디를 입력하세요"
@@ -43,7 +43,7 @@ export default function LoginCard({ onSubmit }: LoginCardProps) {
           <label htmlFor="pwd" className="block text-sm font-medium text-gray-700">비밀번호</label>
           <input
             type="password"
-            className={clsx("mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500", {
+            className={clsx("mt-1 block w-full border-gray-300 rounded-md shadow focus:border-blue-500 focus:ring-blue-500", {
               "border-red-500": errors.pwd,
             })}
             placeholder="비밀번호를 입력하세요"

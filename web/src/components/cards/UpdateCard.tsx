@@ -30,7 +30,7 @@ export default function UpdateCard({ onSubmit }: UpdateCardProps) {
           <label htmlFor="nickname" className="block text-sm font-medium text-gray-700">닉네임</label>
           <input
             type="text"
-            className={clsx("mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500", {
+            className={clsx("mt-1 block w-full border-gray-300 rounded-md shadow focus:border-blue-500 focus:ring-blue-500", {
               "border-red-500": errors.nickname,
             })}
             placeholder="닉네임을 입력하세요"
