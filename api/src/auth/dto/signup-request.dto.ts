@@ -9,9 +9,6 @@ export class SignUpRequestDto {
   @ApiProperty({ example: "password123", description: "사용자 비밀번호" })
   pwd: string;
 
-  @ApiProperty({ example: "password123", description: "비밀번호 확인" })
-  confirmPwd: string;
-
   @ApiProperty({ example: 1, description: "비밀번호 사용 여부 (1: 사용, 0: 사용 안함)" })
   @IsInt()
   @Min(0)

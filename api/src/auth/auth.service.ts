@@ -88,10 +88,7 @@ export class AuthService {
    * @throws InternalServerErrorException JWT 비밀 키가 설정되어 있지 않은 경우
    */
   async signup(dto: SignUpRequestDto): Promise<SignUpResponseDto> {
-    const { id, pwd, confirmPwd, usePwd, name, nickname } = dto;
-
-    // 비밀번호 확인
-    if (pwd !== confirmPwd) throw new BadRequestException('비밀번호가 일치하지 않습니다.');
+    const { id, pwd, usePwd, name, nickname } = dto;
 
     // 사용자 생성
     const encodedPassword = Buffer.from(pwd).toString('base64');

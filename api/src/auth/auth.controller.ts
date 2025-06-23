@@ -1,11 +1,10 @@
-import { Controller, Post, Body, Get, UseGuards, Res, HttpCode, Put, Delete } from '@nestjs/common';
-import { Response } from 'express';
+import { Controller, Post, Body, Get, UseGuards, Res, HttpCode, Put, Delete, Req, UnauthorizedException } from '@nestjs/common';
+import { Request, Response } from 'express';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { AuthService } from './auth.service';
 import { LoginRequestDto } from './dto/login-request.dto';
 import { User } from '../common/decorator/user.decorator';
 import { SafeUser } from '../common/type/safe-user.type';
-import { RefreshRequestDto } from './dto/refresh-request.dto';
 import { SignUpRequestDto } from './dto/signup-request.dto';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { UpdateRequestDto } from './dto/update-request.dto';
@@ -105,13 +104,18 @@ export class AuthController {
   @Post('refresh')
   @HttpCode(200)
   async refresh(
-    @Body() dto: RefreshRequestDto,
+    @Req() req: Request,
     @Res({ passthrough: true }) res: Response
   ) {
-    const { accessToken, refreshToken } = await this.authService.refresh(dto);
+    const refreshToken = req.cookies?.refreshtoken;
+
+    const {
+      accessToken: newAccessToken,
+      refreshToken: newRefreshToken,
+    } = await this.authService.refresh({ refreshToken });
 
     // 쿠키에 새 토큰 저장
-    res.cookie('accesstoken', accessToken, {
+    res.cookie('accesstoken', newAccessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
@@ -119,7 +123,7 @@ export class AuthController {
     });
 
     // 쿠키에 새 리프레시 토큰 저장
-    res.cookie('refreshtoken', refreshToken, {
+    res.cookie('refreshtoken', newRefreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
@@ -127,7 +131,7 @@ export class AuthController {
     });
 
     return {
-      accessToken,
+      newAccessToken,
     };
   }
 
@@ -142,7 +146,6 @@ export class AuthController {
    * {
    *  "id": "newuser",
    *  "pwd": "newpassword",
-   *  "confirmPwd": "newpassword",
    *  "usePwd": 1,
    *  "name": "New User",
    *  "nickname": "newuser123"
