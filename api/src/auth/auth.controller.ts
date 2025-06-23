@@ -61,7 +61,7 @@ export class AuthController {
     });
 
     // 쿠키에 리프레시 토큰 저장
-    res.cookie('refreshToken', refreshToken, {
+    res.cookie('refreshtoken', refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
@@ -86,9 +86,9 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @Post('logout')
   @HttpCode(204)
-  logout(@Res({ passthrough: true }) res: Response, @User() user: SafeUser) {
+  logout(@Res({ passthrough: true }) res: Response) {
     res.clearCookie('accesstoken');
-    res.clearCookie('refreshToken');
+    res.clearCookie('refreshtoken');
   }
 
   /**
