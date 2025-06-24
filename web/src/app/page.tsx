@@ -8,15 +8,18 @@ import RefreshCard from "@/components/cards/RefreshCard";
 import UpdateCard from "@/components/cards/UpdateCard";
 import LogoutCard from "@/components/cards/LogoutCard";
 import DeleteCard from "@/components/cards/DeleteCard";
+import { useProfile } from "@/hooks/useProfile";
 import { useToast } from "@/hooks/useToast";
 import api from "@/libs/axios";
 import { SignUpSchemaType } from "@/schemas/SignUpSchema";
 import { LoginSchemaType } from "@/schemas/LoginSchema";
 import { UpdateSchemaType } from "@/schemas/UpdateSchema";
 import { useAuthStore } from "@/stores/useAuthStore";
+import { mutate } from "swr";
 
 export default function Home() {
   const setAccessToken = useAuthStore((state) => state.setAccessToken);
+  const { user } = useProfile();
   const { showToast, Toast } = useToast();
 
   const onSignUpSubmit = async ({ id, pwd, name, nickname }: SignUpSchemaType): Promise<void> => {
@@ -90,6 +93,7 @@ export default function Home() {
     try {
       await api.post("/auth/logout");
       setAccessToken("");
+      mutate("/auth/profile", null);
       showToast("로그아웃 성공");
     } catch (error) {
       if (error instanceof Error) {
@@ -103,8 +107,8 @@ export default function Home() {
   const onDeleteSubmit = async (): Promise<void> => {
     try {
       await api.delete("/auth/delete");
-      setAccessToken("");
       showToast("회원 탈퇴 성공");
+      setAccessToken("");
     } catch (error) {
       if (error instanceof Error) {
         showToast(error.message);
@@ -130,25 +134,29 @@ export default function Home() {
             <LoginCard onSubmit={onLoginSubmit} />
           </article>
 
-          <article>
-            <ProfileCard onSubmit={onProfileSubmit} />
-          </article>
-          
-          <article>
-            <RefreshCard onSubmit={onRefreshSubmit} />
-          </article>
+          {user && (
+            <>
+              <article>
+                <ProfileCard onSubmit={onProfileSubmit} />
+              </article>
+              
+              <article>
+                <RefreshCard onSubmit={onRefreshSubmit} />
+              </article>
 
-          <article>
-            <UpdateCard onSubmit={onUpdateSubmit} />
-          </article>
+              <article>
+                <UpdateCard onSubmit={onUpdateSubmit} />
+              </article>
 
-          <article>
-            <LogoutCard onSubmit={onLogoutSubmit} />
-          </article>
-          
-          <article>
-            <DeleteCard onSubmit={onDeleteSubmit} />
-          </article>
+              <article>
+                <LogoutCard onSubmit={onLogoutSubmit} />
+              </article>
+              
+              <article>
+                <DeleteCard onSubmit={onDeleteSubmit} />
+              </article>
+            </>
+          )}
         </section>
       </main>
     </>
