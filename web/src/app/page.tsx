@@ -106,8 +106,9 @@ export default function Home() {
   const onDeleteSubmit = async (): Promise<void> => {
     try {
       await api.delete("/auth/delete");
-      showToast("회원 탈퇴 성공");
       setAccessToken("");
+      mutate(undefined, false);
+      showToast("회원 탈퇴 성공");
     } catch (error) {
       if (error instanceof Error) {
         showToast(error.message);
