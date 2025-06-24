@@ -15,11 +15,10 @@ import { SignUpSchemaType } from "@/schemas/SignUpSchema";
 import { LoginSchemaType } from "@/schemas/LoginSchema";
 import { UpdateSchemaType } from "@/schemas/UpdateSchema";
 import { useAuthStore } from "@/stores/useAuthStore";
-import { mutate } from "swr";
 
 export default function Home() {
   const setAccessToken = useAuthStore((state) => state.setAccessToken);
-  const { user } = useProfile();
+  const { user, mutate } = useProfile();
   const { showToast, Toast } = useToast();
 
   const onSignUpSubmit = async ({ id, pwd, name, nickname }: SignUpSchemaType): Promise<void> => {
@@ -93,7 +92,7 @@ export default function Home() {
     try {
       await api.post("/auth/logout");
       setAccessToken("");
-      mutate("/auth/profile", null);
+      mutate(undefined, false);
       showToast("로그아웃 성공");
     } catch (error) {
       if (error instanceof Error) {
