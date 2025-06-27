@@ -58,7 +58,6 @@ export class UserService {
    */
   async update(updateUserDto: UpdateUserDto): Promise<SafeUser> {
     const { idx, nickname } = updateUserDto;
-    if (!idx) throw new BadRequestException('유저 정보가 제공되지 않았습니다.');
 
     const updatedUser = await this.prisma.user.update({
       where: { idx },
@@ -81,7 +80,6 @@ export class UserService {
    */
   async delete(deleteUserDto: DeleteUserDto): Promise<SafeUser> {
     const { idx } = deleteUserDto;
-    if (!idx) throw new BadRequestException('유저 정보가 제공되지 않았습니다.');
 
     const deletedUser = await this.prisma.user.delete({
       where: { idx }
