@@ -53,7 +53,6 @@ export class UserService {
    * 유저 정보를 업데이트하고 민감한 정보를 제외한 유저 정보를 반환합니다.
    * @param UpdateUserDto - 유저 업데이트 DTO
    * @returns 민감한 정보를 제외한 유저 정보
-   * @throws BadRequestException - 유저 정보가 제공되지 않은 경우
    * @throws NotFoundException - 유저를 찾을 수 없는 경우
    */
   async update(updateUserDto: UpdateUserDto): Promise<SafeUser> {
@@ -75,7 +74,6 @@ export class UserService {
    * 유저 정보를 삭제하고 민감한 정보를 제외한 유저 정보를 반환합니다.
    * @param DeleteUserDto - 유저 삭제 DTO
    * @returns 민감한 정보를 제외한 유저 정보
-   * @throws BadRequestException - 유저 정보가 제공되지 않은 경우
    * @throws NotFoundException - 유저를 찾을 수 없는 경우
    */
   async delete(deleteUserDto: DeleteUserDto): Promise<SafeUser> {

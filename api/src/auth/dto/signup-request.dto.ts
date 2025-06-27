@@ -10,9 +10,9 @@ export class SignUpRequestDto {
   pwd: string;
 
   @ApiProperty({ example: 1, description: "비밀번호 사용 여부 (1: 사용, 0: 사용 안함)" })
-  @IsInt()
-  @Min(0)
-  @Max(1)
+  @IsInt({ message: "비밀번호 사용 여부는 정수여야 합니다." })
+  @Min(0, { message: "비밀번호 사용 여부는 0 또는 1이어야 합니다." })
+  @Max(1, { message: "비밀번호 사용 여부는 0 또는 1이어야 합니다." })
   usePwd: number;
 
   @ApiProperty({ example: "홍길동", description: "사용자 이름" })
