@@ -1,7 +1,7 @@
 import { TestingModule, Test } from "@nestjs/testing";
 import { PrismaService } from "./prisma.service";
 
-describe('PrismaService', () => {
+describe("PrismaService", () => {
   let prismaService: PrismaService;
 
   beforeEach(async () => {
@@ -10,25 +10,30 @@ describe('PrismaService', () => {
     }).compile();
 
     prismaService = module.get<PrismaService>(PrismaService);
+
+    prismaService.$connect = jest.fn();
+    prismaService.$disconnect = jest.fn();
   });
 
-  it('should be defined', () => {
+  it("PrismaService가 정의되어야 합니다", () => {
     expect(prismaService).toBeDefined();
   });
 
-  describe('onModuleInit', () => {
-    it('should call $connect', async () => {
-      const connectSpy = jest.spyOn(prismaService, '$connect');
+  describe("onModuleInit", () => {
+    it("onModuleInit() 메서드는 $connect를 호출해야 합니다", async () => {
       await prismaService.onModuleInit();
-      expect(connectSpy).toHaveBeenCalled();
+      expect(prismaService.$connect).toHaveBeenCalled();
     });
   });
 
-  describe('enableShutdownHooks', () => {
-    it('should call $disconnect', async () => {
-      const disconnectSpy = jest.spyOn(prismaService, '$disconnect');
+  describe("enableShutdownHooks", () => {
+    it("enableShutdownHooks() 메서드는 $disconnect를 호출해야 합니다", async () => {
       await prismaService.enableShutdownHooks();
-      expect(disconnectSpy).toHaveBeenCalled();
+      expect(prismaService.$disconnect).toHaveBeenCalled();
     });
   });
+
+  afterEach(() => {
+    jest.clearAllMocks(); // 각 테스트 후 mock 초기화
+  });  
 });
