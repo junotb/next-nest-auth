@@ -9,7 +9,14 @@ import { DeleteUserDto } from "./dto/delete-user.dto";
 
 describe('UserService', () => {
   let userService: UserService;
-  let prismaService: Partial<Record<keyof PrismaService, any>>;
+  let prismaService: {
+    user: {
+      findUnique: jest.Mock;
+      create: jest.Mock;
+      update: jest.Mock;
+      delete: jest.Mock;
+    }
+  }
 
   beforeEach(async () => {
     prismaService = {
@@ -41,6 +48,7 @@ describe('UserService', () => {
   describe('findById', () => {
     it('유저 ID로 유저 정보를 찾아야 합니다.', async () => {
       const fakeUser = { id: 'user123', pwd: 'password123', usePwd: 0, name: 'Test User', nickname: 'testuser' };
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
       prismaService.user.findUnique.mockResolvedValue(fakeUser);
 
       const foundUser = await userService.findById('user123');

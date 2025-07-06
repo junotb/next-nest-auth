@@ -1,9 +1,9 @@
 import { SafeUser } from "src/common/type/safe-user.type";
 
-export class UpdateResponseDto {
+export class DeleteResponseDto {
   user: SafeUser;
 
-  constructor(partial: Partial<UpdateResponseDto>) {
+  constructor(partial: Partial<DeleteResponseDto>) {
     Object.assign(this, partial);
   }
 }

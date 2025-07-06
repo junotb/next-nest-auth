@@ -68,6 +68,7 @@ describe('AuthService', () => {
       const result = await authService.login(dto);
       expect(result).toEqual({
         accessToken: 'accessToken',
+        refreshToken: 'refreshToken',
       });
     });
 
@@ -100,6 +101,7 @@ describe('AuthService', () => {
       const result = await authService.refresh(dto);
       expect(result).toEqual({
         accessToken: 'newAccessToken',
+        refreshToken: 'newRefreshToken',
       });
     });
   });
@@ -151,7 +153,7 @@ describe('AuthService', () => {
   });
 
   describe('delete', () => {
-    it('사용자를 삭제하고 성공 상태 코드를 반환해야 합니다.', async () => {
+    it('사용자를 삭제해야 합니다.', async () => {
       const deletedUser: SafeUser = {
         idx: 1,
         id: 'user123',
@@ -163,7 +165,9 @@ describe('AuthService', () => {
       };
       userService.delete!.mockResolvedValue(deletedUser);
       const result = await authService.delete(deletedUser);
-      expect(result).toEqual({ message: '사용자 정보가 삭제되었습니다.' });
+      expect(result).toEqual({
+        user: deletedUser
+      });
     });
   });
 });

@@ -8,6 +8,7 @@ import { SignUpResponseDto } from './dto/signup-response.dto';
 import { SignUpRequestDto } from './dto/signup-request.dto';
 import { UpdateResponseDto } from './dto/update-response.dto';
 import { UpdateRequestDto } from './dto/update-request.dto';
+import { DeleteResponseDto } from './dto/delete-response.dto';
 import { UserService } from '../user/user.service';
 import { SafeUser } from '../common/type/safe-user.type';
 
@@ -108,7 +109,7 @@ export class AuthService {
   async update(dto: UpdateRequestDto, user: SafeUser): Promise<UpdateResponseDto> {
     const { idx } = user;
     await this.userService.update({ ...dto, idx });
-    return { message: '사용자 정보가 업데이트 되었습니다.' };
+    return { user };
   }
 
   /**
@@ -118,9 +119,9 @@ export class AuthService {
    * @throws BadRequestException 사용자 정보가 유효하지 않은 경우
    * @throws InternalServerErrorException JWT 비밀 키가 설정되어 있지 않은 경우
    */
-  async delete(user: SafeUser): Promise<{ message: string }> {
+  async delete(user: SafeUser): Promise<DeleteResponseDto> {
     const { idx } = user;
     await this.userService.delete({ idx });
-    return { message: '사용자 정보가 삭제되었습니다.' };
+    return { user };
   }
 }
