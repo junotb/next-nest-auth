@@ -48,7 +48,6 @@ describe('UserService', () => {
   describe('findById', () => {
     it('유저 ID로 유저 정보를 찾아야 합니다.', async () => {
       const fakeUser = { id: 'user123', pwd: 'password123', usePwd: 0, name: 'Test User', nickname: 'testuser' };
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
       prismaService.user.findUnique.mockResolvedValue(fakeUser);
 
       const foundUser = await userService.findById('user123');
