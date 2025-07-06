@@ -92,7 +92,7 @@ export class UserService {
    * @returns 민감한 정보를 제외한 유저 정보
    */
   private getSafeUser(user: User): SafeUser {
-    const { pwd, usePwd, ...safeUser } = user;
+    const { pwd: _pwd, usePwd: _usePwd, ...safeUser } = user;
     return safeUser;
   }
 }

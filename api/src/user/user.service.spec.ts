@@ -9,7 +9,14 @@ import { DeleteUserDto } from "./dto/delete-user.dto";
 
 describe('UserService', () => {
   let userService: UserService;
-  let prismaService: Partial<Record<keyof PrismaService, any>>;
+  let prismaService: {
+    user: {
+      findUnique: jest.Mock;
+      create: jest.Mock;
+      update: jest.Mock;
+      delete: jest.Mock;
+    }
+  }
 
   beforeEach(async () => {
     prismaService = {
