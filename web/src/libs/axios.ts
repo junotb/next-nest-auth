@@ -24,7 +24,7 @@ api.interceptors.response.use(
       originalConfig._retry = true;
 
       try {
-        const response = await axios.post(
+        const response = await api.post(
           '/auth/refresh',
           { refreshtoken: 'auto-from-cookie' },
           { withCredentials: true }
