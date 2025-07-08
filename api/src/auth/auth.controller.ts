@@ -129,7 +129,7 @@ export class AuthController {
     });
 
     return {
-      newAccessToken,
+      accessToken: newAccessToken,
     };
   }
 
