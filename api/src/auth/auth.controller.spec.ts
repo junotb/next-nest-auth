@@ -4,7 +4,7 @@ import { AuthService } from "./auth.service";
 import { LoginRequestDto } from "./dto/login-request.dto";
 import { SignUpRequestDto } from "./dto/signup-request.dto";
 import { SafeUser } from "src/common/type/safe-user.type";
-import { UnauthorizedException } from "@nestjs/common";
+import { BadRequestException, UnauthorizedException } from "@nestjs/common";
 
 describe('AuthController', () => {
   let authController: AuthController;
@@ -127,9 +127,9 @@ describe('AuthController', () => {
         nickname: 'newuser123'
       };
 
-      authService.signUp!.mockRejectedValue(new UnauthorizedException('Invalid user information'));
+      authService.signUp!.mockRejectedValue(new BadRequestException('Invalid user information'));
 
-      await expect(authController.signup(dto)).rejects.toThrow(UnauthorizedException);
+      await expect(authController.signup(dto)).rejects.toThrow(BadRequestException);
     });
   });
 
@@ -165,9 +165,9 @@ describe('AuthController', () => {
         lastLoginDate: new Date().getTime(),
       };
 
-      authService.update!.mockRejectedValue(new UnauthorizedException('Invalid user information'));
+      authService.update!.mockRejectedValue(new BadRequestException('Invalid user information'));
 
-      await expect(authController.update(dto, user)).rejects.toThrow(UnauthorizedException);
+      await expect(authController.update(dto, user)).rejects.toThrow(BadRequestException);
     });
   });
 
@@ -202,9 +202,9 @@ describe('AuthController', () => {
       lastLoginDate: new Date().getTime(),
     };
 
-    authService.delete!.mockRejectedValue(new UnauthorizedException('Cannot delete user'));
+    authService.delete!.mockRejectedValue(new BadRequestException('Cannot delete user'));
 
-    await expect(authController.delete(user)).rejects.toThrow(UnauthorizedException);
+    await expect(authController.delete(user)).rejects.toThrow(BadRequestException);
   });
 
 });
