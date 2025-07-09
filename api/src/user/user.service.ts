@@ -28,10 +28,10 @@ export class UserService {
    * @returns 민감한 정보를 제외한 유저 정보
    * @throws BadRequestException - 유저가 이미 존재하는 경우
    */
-  async create(createUserDto: CreateUserDto): Promise<SafeUser> {
-    const { id, pwd, usePwd, name, nickname } = createUserDto;
+  async create(dto: CreateUserDto): Promise<SafeUser> {
+    const { id, pwd, usePwd, name, nickname } = dto;
 
-    const exists = await this.prisma.user.findUnique({ where: { id } });
+    const exists = await this.findById(id);
     if (exists) throw new BadRequestException('이미 존재하는 유저입니다.');
 
     const user = await this.prisma.user.create({
@@ -55,8 +55,8 @@ export class UserService {
    * @returns 민감한 정보를 제외한 유저 정보
    * @throws NotFoundException - 유저를 찾을 수 없는 경우
    */
-  async update(updateUserDto: UpdateUserDto): Promise<SafeUser> {
-    const { idx, nickname } = updateUserDto;
+  async update(dto: UpdateUserDto): Promise<SafeUser> {
+    const { idx, nickname } = dto;
 
     const updatedUser = await this.prisma.user.update({
       where: { idx },
@@ -76,8 +76,8 @@ export class UserService {
    * @returns 민감한 정보를 제외한 유저 정보
    * @throws NotFoundException - 유저를 찾을 수 없는 경우
    */
-  async delete(deleteUserDto: DeleteUserDto): Promise<SafeUser> {
-    const { idx } = deleteUserDto;
+  async delete(dto: DeleteUserDto): Promise<SafeUser> {
+    const { idx } = dto;
 
     const deletedUser = await this.prisma.user.delete({
       where: { idx }
