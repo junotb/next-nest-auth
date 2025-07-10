@@ -1,7 +1,7 @@
 import { Test, TestingModule } from "@nestjs/testing";
 import { PrismaService } from "../prisma/prisma.service";
 import { UserService } from "./user.service";
-import { BadRequestException, NotFoundException } from "@nestjs/common";
+import { BadRequestException } from "@nestjs/common";
 import { CreateUserDto } from "./dto/create-user.dto";
 import { SafeUser } from "src/common/type/safe-user.type";
 import { UpdateUserDto } from "./dto/update-user.dto";
@@ -47,15 +47,15 @@ describe('UserService', () => {
 
   describe('findById', () => {
     it('유저 ID로 유저 정보를 찾아야 합니다.', async () => {
-      const fakeUser = { id: 'user123', pwd: 'password123', usePwd: 0, name: 'Test User', nickname: 'testuser' };
-      prismaService.user.findUnique.mockResolvedValue(fakeUser);
+      const existingUser = { id: 'user123', pwd: 'password123', usePwd: 0, name: 'Test User', nickname: 'testuser' };
+      prismaService.user.findUnique.mockResolvedValue(existingUser);
 
-      const foundUser = await userService.findById('user123');
-      expect(foundUser).toEqual(fakeUser);
+      const user = await userService.findById('user123');
+      expect(user).toEqual(existingUser);
     });
 
     it('유저를 찾을 수 없으면 NotFoundException을 던져야 합니다.', async () => {
-      await expect(userService.findById('non-existent-user-id')).rejects.toThrow(NotFoundException);
+      await expect(userService.findById('non-existent-user-id')).rejects.toThrow(BadRequestException);
     });
   });
 
@@ -70,8 +70,6 @@ describe('UserService', () => {
         updateDate: new Date().getTime(),
         lastLoginDate: new Date().getTime(),
       };
-      prismaService.user.create.mockResolvedValue(newUser);
-      
       const createUserDto: CreateUserDto = {
         id: newUser.id,
         pwd: 'password',
@@ -79,6 +77,8 @@ describe('UserService', () => {
         name: newUser.name,
         nickname: newUser.nickname
       };
+      prismaService.user.create.mockResolvedValue(newUser);
+      
       const createdUser = await userService.create(createUserDto);
       expect(createdUser).toEqual(newUser);
     });
@@ -108,19 +108,22 @@ describe('UserService', () => {
         updateDate: new Date().getTime(),
         lastLoginDate: new Date().getTime(),
       };
-      prismaService.user.update.mockResolvedValue(existingUser);
-      
       const updateUserDto: UpdateUserDto = {
         idx: existingUser.idx,
         nickname: 'updatednickname'
       };
+
+      prismaService.user.findUnique.mockResolvedValue(existingUser);
+      prismaService.user.update.mockResolvedValue(existingUser);
+      
       const updatedUser = await userService.update(updateUserDto);
+      expect(prismaService.user.findUnique).toHaveBeenCalledWith({ where: { idx: existingUser.idx } });
       expect(updatedUser).toEqual(existingUser);
     });
 
     it('존재하지 않는 유저 정보를 업데이트 시 NotFoundException을 던져야 합니다.', async () => {
       const nonExistentIdx = 99999;
-      await expect(userService.update({ idx: nonExistentIdx, nickname: 'nickname' })).rejects.toThrow(NotFoundException);
+      await expect(userService.update({ idx: nonExistentIdx, nickname: 'nickname' })).rejects.toThrow(BadRequestException);
     });
   });
 
@@ -135,18 +138,19 @@ describe('UserService', () => {
         updateDate: new Date().getTime(),
         lastLoginDate: new Date().getTime(),
       };
+      prismaService.user.findUnique.mockResolvedValue(existingUser);
       prismaService.user.delete.mockResolvedValue(existingUser);
 
-      const deleteUserDto: DeleteUserDto = {
-        idx: 1
-      };
+      const deleteUserDto: DeleteUserDto = { idx: 1 };
       const deletedUser = await userService.delete(deleteUserDto);
+      
+      expect(prismaService.user.findUnique).toHaveBeenCalledWith({ where: { idx: existingUser.idx } });
       expect(deletedUser).toEqual(existingUser);
     });
 
     it('존재하지 않는 유저 삭제 시 NotFoundException을 던져야 합니다.', async () => {
       const nonExistentIdx = 99999;
-      await expect(userService.delete({ idx: nonExistentIdx })).rejects.toThrow(NotFoundException);
+      await expect(userService.delete({ idx: nonExistentIdx })).rejects.toThrow(BadRequestException);
     });
   });
 });

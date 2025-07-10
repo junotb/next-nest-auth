@@ -26,8 +26,8 @@ model SocialUser {
   userIdx               Int         @unique                   @map("USER_IDX")
   provider              String      @map("PROVIDER")
   providerAccountId     String      @unique                   @map("PROVIDER_ACCOUNT_ID")
-  tokenType             String      @map("TOKEN_TYPE")
-  type                  String      @map("TYPE")
+  tokenType             String?      @map("TOKEN_TYPE")
+  type                  String?      @map("TYPE")
 
   @@map("SOCIAL_USER")
 }

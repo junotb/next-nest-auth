@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { User } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -18,7 +18,7 @@ export class UserService {
    */
   async findById(id: string): Promise<User> {
     const user = await this.prisma.user.findUnique({ where: { id } });
-    if (!user) throw new NotFoundException('유저를 찾을 수 없습니다.');
+    if (!user) throw new BadRequestException('유저를 찾을 수 없습니다.');
     return user;
   }
 
@@ -28,8 +28,8 @@ export class UserService {
    * @returns 민감한 정보를 제외한 유저 정보
    * @throws BadRequestException - 유저가 이미 존재하는 경우
    */
-  async create(createUserDto: CreateUserDto): Promise<SafeUser> {
-    const { id, pwd, usePwd, name, nickname } = createUserDto;
+  async create(dto: CreateUserDto): Promise<SafeUser> {
+    const { id, pwd, usePwd, name, nickname } = dto;
 
     const exists = await this.prisma.user.findUnique({ where: { id } });
     if (exists) throw new BadRequestException('이미 존재하는 유저입니다.');
@@ -45,7 +45,6 @@ export class UserService {
         updateDate: new Date().getTime(),
       },
     });
-
     return this.getSafeUser(user);
   }
 
@@ -53,10 +52,13 @@ export class UserService {
    * 유저 정보를 업데이트하고 민감한 정보를 제외한 유저 정보를 반환합니다.
    * @param UpdateUserDto - 유저 업데이트 DTO
    * @returns 민감한 정보를 제외한 유저 정보
-   * @throws NotFoundException - 유저를 찾을 수 없는 경우
+   * @throws BadRequestException - 유저를 찾을 수 없는 경우
    */
-  async update(updateUserDto: UpdateUserDto): Promise<SafeUser> {
-    const { idx, nickname } = updateUserDto;
+  async update(dto: UpdateUserDto): Promise<SafeUser> {
+    const { idx, nickname } = dto;
+
+    const exists = await this.prisma.user.findUnique({ where: { idx } });
+    if (!exists) throw new BadRequestException('유저를 찾을 수 없습니다.');
 
     const updatedUser = await this.prisma.user.update({
       where: { idx },
@@ -65,8 +67,6 @@ export class UserService {
         updateDate: new Date().getTime(),
       },
     });
-    if (!updatedUser) throw new NotFoundException('유저를 찾을 수 없습니다.');
-
     return this.getSafeUser(updatedUser);
   }
 
@@ -74,15 +74,15 @@ export class UserService {
    * 유저 정보를 삭제하고 민감한 정보를 제외한 유저 정보를 반환합니다.
    * @param DeleteUserDto - 유저 삭제 DTO
    * @returns 민감한 정보를 제외한 유저 정보
-   * @throws NotFoundException - 유저를 찾을 수 없는 경우
+   * @throws BadRequestException - 유저를 찾을 수 없는 경우
    */
-  async delete(deleteUserDto: DeleteUserDto): Promise<SafeUser> {
-    const { idx } = deleteUserDto;
+  async delete(dto: DeleteUserDto): Promise<SafeUser> {
+    const { idx } = dto;
 
-    const deletedUser = await this.prisma.user.delete({
-      where: { idx }
-    });
-    if (!deletedUser) throw new NotFoundException('유저를 찾을 수 없습니다.');
+    const exists = await this.prisma.user.findUnique({ where: { idx } });
+    if (!exists) throw new BadRequestException('유저를 찾을 수 없습니다.');
+
+    const deletedUser = await this.prisma.user.delete({ where: { idx } });
     return this.getSafeUser(deletedUser);
   }
 
