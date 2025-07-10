@@ -1,5 +1,5 @@
 import { Test, TestingModule } from "@nestjs/testing";
-import { BadRequestException, NotFoundException } from "@nestjs/common/exceptions";
+import { BadRequestException, NotFoundException } from "@nestjs/common";
 import { SocialUserService } from "./social-user.service";
 import { PrismaService } from "../prisma/prisma.service";
 import { CreateSocialUserDto } from "./dto/create-social-user.dto";
