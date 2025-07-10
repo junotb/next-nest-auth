@@ -3,6 +3,7 @@
 import Header from "@/components/Header";
 import SignUpCard from "@/components/cards/SignUpCard";
 import LoginCard from "@/components/cards/LoginCard";
+import SocialLoginCard from "@/components/cards/SocialLoginCard";
 import ProfileCard from "@/components/cards/ProfileCard";
 import RefreshCard from "@/components/cards/RefreshCard";
 import UpdateCard from "@/components/cards/UpdateCard";
@@ -47,6 +48,8 @@ export default function Home() {
       }
     }
   };
+
+  const onSocialLoginClick = (provider: string) => window.location.href = `/api/auth/${provider}`;
 
   const onProfileSubmit = async (): Promise<void> => {
     try {
@@ -132,6 +135,10 @@ export default function Home() {
           
           <article>
             <LoginCard onSubmit={onLoginSubmit} />
+          </article>
+
+          <article>
+            <SocialLoginCard handleClick={onSocialLoginClick} />
           </article>
 
           {user && (
