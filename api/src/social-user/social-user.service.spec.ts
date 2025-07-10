@@ -8,8 +8,9 @@ import { DeleteSocialUserDto } from "./dto/delete-social-user.dto";
 describe('SocialUserService', () => {
   let socialUserService: SocialUserService;
   let prismaService: {
-    user: {
+    socialUser: {
       findUnique: jest.Mock;
+      findFirst: jest.Mock;
       create: jest.Mock;
       update: jest.Mock;
       delete: jest.Mock;
@@ -18,8 +19,9 @@ describe('SocialUserService', () => {
 
   beforeEach(async () => {
     prismaService = {
-      user: {
+      socialUser: {
         findUnique: jest.fn(),
+        findFirst: jest.fn(),
         create: jest.fn(),
         update: jest.fn(),
         delete: jest.fn(),
@@ -48,7 +50,7 @@ describe('SocialUserService', () => {
       const provider = 'google';
       const providerAccountId = '1234567890';
 
-      prismaService.user.findUnique.mockResolvedValueOnce({ id: 1, provider, providerAccountId });
+      prismaService.socialUser.findFirst.mockResolvedValueOnce({ id: 1, provider, providerAccountId });
 
       const result = await socialUserService.findByProvider(provider, providerAccountId);
       expect(result).toEqual({ id: 1, provider, providerAccountId });
@@ -58,7 +60,7 @@ describe('SocialUserService', () => {
       const provider = 'google';
       const providerAccountId = '1234567890';
 
-      prismaService.user.findUnique.mockResolvedValueOnce(null);
+      prismaService.socialUser.findFirst.mockResolvedValueOnce(null);
 
       await expect(socialUserService.findByProvider(provider, providerAccountId)).rejects.toThrow(NotFoundException);
     });
@@ -68,7 +70,7 @@ describe('SocialUserService', () => {
     it('소셜 유저를 생성할 수 있어야 합니다.', async () => {
       const dto: CreateSocialUserDto = { userIdx: 1, provider: 'google', providerAccountId: '1234567890' };
 
-      prismaService.user.create.mockResolvedValueOnce(dto);
+      prismaService.socialUser.create.mockResolvedValueOnce(dto);
 
       const result = await socialUserService.createSocialUser(dto);
       expect(result).toEqual(dto);
@@ -77,7 +79,7 @@ describe('SocialUserService', () => {
     it('이미 존재하는 소셜 유저인 경우 예외를 던져야 합니다.', async () => {
       const dto: CreateSocialUserDto = { userIdx: 1, provider: 'google', providerAccountId: '1234567890' };
 
-      prismaService.user.findUnique.mockResolvedValueOnce(dto);
+      prismaService.socialUser.findUnique.mockResolvedValueOnce(dto);
 
       await expect(socialUserService.createSocialUser(dto)).rejects.toThrow(BadRequestException);
     });
@@ -85,19 +87,19 @@ describe('SocialUserService', () => {
 
   describe('deleteSocialUser', () => {
     it('소셜 유저를 삭제할 수 있어야 합니다.', async () => {
-      const dto: DeleteSocialUserDto = { provider: 'google', providerAccountId: '1234567890' };
+      const dto: DeleteSocialUserDto = { userIdx: 1 };
 
-      prismaService.user.findUnique.mockResolvedValueOnce(dto);
-      prismaService.user.delete.mockResolvedValueOnce(dto);
+      prismaService.socialUser.findUnique.mockResolvedValueOnce(dto);
+      prismaService.socialUser.delete.mockResolvedValueOnce(dto);
 
       const result = await socialUserService.deleteSocialUser(dto);
       expect(result).toEqual(dto);
     });
 
     it('소셜 유저를 찾을 수 없는 경우 예외를 던져야 합니다.', async () => {
-      const dto: DeleteSocialUserDto = { provider: 'google', providerAccountId: '1234567890' };
+      const dto: DeleteSocialUserDto = { userIdx: 1 };
 
-      prismaService.user.findUnique.mockResolvedValueOnce(null);
+      prismaService.socialUser.findUnique.mockResolvedValueOnce(null);
 
       await expect(socialUserService.deleteSocialUser(dto)).rejects.toThrow(NotFoundException);
     });
