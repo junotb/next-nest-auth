@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
+// 소셜 플랫폼 설정 타입
 type SocialProviderConfig = {
   authUrl: string;
   clientId: string;
@@ -7,7 +8,7 @@ type SocialProviderConfig = {
   scope?: string;
 }
 
-// 소셜 플랫폼별 설정
+// 소셜 플랫폼 별 설정
 const socialProviderConfig: Record<SocialProviderType, SocialProviderConfig> = {
   naver: {
     authUrl: process.env.NAVER_AUTH_URL ?? "",
@@ -26,9 +27,6 @@ const socialProviderConfig: Record<SocialProviderType, SocialProviderConfig> = {
     scope: "openid email profile",
   },
 };
-
-// 소셜 플랫폼 타입
-type SocialProviderType = "naver" | "kakao" | "google";
 
 interface SocialProviderParams {
   params: {
@@ -55,5 +53,15 @@ export async function GET(_request: NextRequest, { params }: SocialProviderParam
     redirectUrl.searchParams.set("scope", scope);
   }
 
-  return NextResponse.redirect(redirectUrl.toString());
+  const response = NextResponse.redirect(redirectUrl.toString());
+
+  response.cookies.set("state", state, {
+    httpOnly: true,
+    secure: true,
+    path: "/",
+    maxAge: 60 * 5, // 5분
+    sameSite: "lax",
+  });
+
+  return response;
 }
