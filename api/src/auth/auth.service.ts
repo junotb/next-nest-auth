@@ -2,6 +2,8 @@ import { BadRequestException, Injectable, InternalServerErrorException, Unauthor
 import * as jwt from 'jsonwebtoken';
 import { LoginRequestDto } from './dto/login-request.dto';
 import { LoginResponseDto } from './dto/login-response.dto';
+import { SocialLoginRequestDto } from './dto/social-login-request.dto';
+import { SocialLoginResponseDto } from './dto/social-login-response.dto';
 import { RefreshResponseDto } from './dto/refresh-response.dto';
 import { RefreshRequestDto } from './dto/refresh-request.dto';
 import { SignUpResponseDto } from './dto/signup-response.dto';
@@ -10,11 +12,15 @@ import { UpdateResponseDto } from './dto/update-response.dto';
 import { UpdateRequestDto } from './dto/update-request.dto';
 import { DeleteResponseDto } from './dto/delete-response.dto';
 import { UserService } from '../user/user.service';
+import { SocialUserService } from '../social-user/social-user.service';
 import { SafeUser } from '../common/type/safe-user.type';
 
 @Injectable()
 export class AuthService {
-  constructor(private readonly userService: UserService) {}
+  constructor(
+    private readonly userService: UserService,
+    private readonly socialUserService: SocialUserService
+  ) {}
 
   /**
    * JWT 비밀 키를 가져옵니다.
@@ -54,12 +60,60 @@ export class AuthService {
   }
 
   /**
+   * 사용자 소셜 로그인 처리
+   * @param dto 소셜 로그인 요청 DTO
+   * @returns 토큰
+   * @throws BadRequestException 소셜 로그인 정보가 유효하지 않은 경우
+   * @throws InternalServerErrorException JWT 비밀 키가 설정되어 있지 않은 경우
+   */
+  async socialLogin(dto: SocialLoginRequestDto): Promise<SocialLoginResponseDto> {
+    const { provider, providerAccountId, id, name, nickname } = dto;
+
+    // 소셜 사용자 조회
+    const exists = await this.socialUserService.findByProvider(provider, providerAccountId);
+
+    const userIdx = exists?.userIdx;
+    let socialUser = exists ? await this.userService.findByIdx(userIdx) : null;
+
+    if (!socialUser) {
+      socialUser = await this.userService.create({
+        id,
+        pwd: '', // 소셜 로그인은 비밀번호가 없으므로 빈 문자열
+        usePwd: 1, // 소셜 로그인 사용
+        name,
+        nickname,
+      });
+
+      if (!userIdx) {
+        await this.socialUserService.createSocialUser({
+          userIdx: socialUser.idx,
+          provider,
+          providerAccountId,
+        });
+      }
+    }
+
+    const newNewUser = await this.userService.create({
+      id,
+      pwd: '', // 소셜 로그인은 비밀번호가 없으므로 빈 문자열
+      usePwd: 1, // 소셜 로그인 사용
+      name,
+      nickname,
+    });
+
+    return {
+      accessToken: jwt.sign({ sub: newNewUser.idx }, this.getJwtSecret(), { expiresIn: "15m" }),
+      refreshToken: jwt.sign({ sub: newNewUser.idx }, this.getJwtSecret(), { expiresIn: "7d" }),
+    };
+  }
+
+  /**
    * 리프레시 토큰을 사용하여 새로운 액세스 토큰을 발급합니다.
    * @param dto 리프레시 토큰 정보 DTO
    * @returns 새로운 액세스 토큰과 성공 메시지
    * @throws UnauthorizedException 리프레시 토큰이 없거나 유효하지 않은 경우
    */
-  async refresh(dto: RefreshRequestDto): Promise<RefreshResponseDto> {
+  refresh(dto: RefreshRequestDto): RefreshResponseDto {
     const { refreshToken } = dto;
     if (!refreshToken) throw new UnauthorizedException('리프레시 토큰이 없습니다.');
 
@@ -73,7 +127,7 @@ export class AuthService {
         accessToken: newAccessToken,
         refreshToken: newRefreshToken,
       };
-    } catch (_error) {
+    } catch {
       throw new UnauthorizedException('리프레시 토큰이 유효하지 않습니다.');
     }
   }

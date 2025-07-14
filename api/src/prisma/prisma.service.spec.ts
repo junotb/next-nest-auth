@@ -22,6 +22,7 @@ describe("PrismaService", () => {
   describe("onModuleInit", () => {
     it("onModuleInit() 메서드는 $connect를 호출해야 합니다", async () => {
       await prismaService.onModuleInit();
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(prismaService.$connect).toHaveBeenCalled();
     });
   });
@@ -29,6 +30,7 @@ describe("PrismaService", () => {
   describe("enableShutdownHooks", () => {
     it("enableShutdownHooks() 메서드는 $disconnect를 호출해야 합니다", async () => {
       await prismaService.enableShutdownHooks();
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(prismaService.$disconnect).toHaveBeenCalled();
     });
   });

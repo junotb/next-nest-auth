@@ -1,62 +1,48 @@
 import { NextRequest, NextResponse } from "next/server";
 import axios from "axios";
-
-// 소셜 플랫폼 설정 타입 //
-type SocialProviderConfig = {
-  tokenUrl: string;
-  infoUrl: string;
-  clientId: string;
-  clientSecret: string;
-  redirectUri: string;
-  getUserInfo: (data: any) => {
-    id: string;
-    email: string;
-    name: string;
-    nickname: string;
-  };
-};
+import { useAuthStore } from '@/stores/useAuthStore';
 
 // 소셜 플랫폼 별 설정
-const socialProviderConfig: Record<SocialProviderType, SocialProviderConfig> = {
+const socialProviderConfig = {
   naver: {
     tokenUrl: process.env.NAVER_TOKEN_URL ?? "",
     infoUrl: process.env.NAVER_INFO_URL ?? "",
     clientId: process.env.NAVER_CLIENT_ID ?? "",
     clientSecret: process.env.NAVER_CLIENT_SECRET ?? "",
     redirectUri: process.env.NAVER_REDIRECT_URI ?? "",
-    getUserInfo: (data: any) => ({
+    getUserInfo: (data: SocialNaverResponse) => ({
       id: data.response.id,
       email: data.response.email,
       name: data.response.name,
       nickname: data.response.nickname,
     }),
-  },
+  } satisfies SocialProviderConfig<SocialNaverResponse>,
   kakao: {
     tokenUrl: process.env.KAKAO_TOKEN_URL ?? "",
     infoUrl: process.env.KAKAO_INFO_URL ?? "",
     clientId: process.env.KAKAO_CLIENT_ID ?? "",
     clientSecret: process.env.KAKAO_CLIENT_SECRET ?? "",
     redirectUri: process.env.KAKAO_REDIRECT_URI ?? "",
-    getUserInfo: (data: any) => ({
+    getUserInfo: (data: SocialKakaoResponse) => ({
       id: data.id,
       email: data.kakao_account.email,
       name: data.kakao_account.profile.nickname,
       nickname: data.kakao_account.profile.nickname,
     }),
-  },
+  } satisfies SocialProviderConfig<SocialKakaoResponse>,
   google: {
     tokenUrl: process.env.GOOGLE_TOKEN_URL ?? "",
     infoUrl: process.env.GOOGLE_INFO_URL ?? "",
     clientId: process.env.GOOGLE_CLIENT_ID ?? "",
     clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? "",
     redirectUri: process.env.GOOGLE_REDIRECT_URI ?? "",
-    getUserInfo: (data: any) => ({
+    getUserInfo: (data: SocialGoogleResponse) => ({
       id: data.sub,
       email: data.email,
       name: data.name,
       nickname: "", // 구글은 닉네임 제공 안함
     }),
-  },
+  } satisfies SocialProviderConfig<SocialGoogleResponse>,
 };
 
 interface SocialProviderParams {
@@ -94,7 +80,31 @@ export async function GET(request: NextRequest, { params }: SocialProviderParams
     },
   });
 
-  const { id, email, name, nickname } = getUserInfo(infoResponse.data);
+  const { id: providerAccountId, email: id, name, nickname } = getUserInfo(infoResponse.data);
 
-  return NextResponse.redirect(`http://localhost:3000/?provider=${provider}&id=${id}&email=${email}&name=${name}&nickname=${nickname}`);
+  const response = await fetch('http://localhost:3001/auth/login/social', {
+    method: 'POST',
+    credentials: 'include', // withCredentials 대응
+    headers: {
+      'Content-Type': 'application/json',
+      ...(useAuthStore.getState().accessToken && {
+        Authorization: `Bearer ${useAuthStore.getState().accessToken}`,
+      }),
+    },
+    body: JSON.stringify({
+      provider,
+      providerAccountId,
+      id,
+      name,
+      nickname,
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+
+  const data = await response.json();
+
+  return NextResponse.json({ accessToken: data.accessToken });
 };

@@ -1,9 +1,10 @@
 import { Test, TestingModule } from "@nestjs/testing";
+import { Request, Response } from 'express';
 import { AuthController } from "./auth.controller";
 import { AuthService } from "./auth.service";
 import { LoginRequestDto } from "./dto/login-request.dto";
 import { SignUpRequestDto } from "./dto/signup-request.dto";
-import { SafeUser } from "src/common/type/safe-user.type";
+import { SafeUser } from "../common/type/safe-user.type";
 import { BadRequestException, UnauthorizedException } from "@nestjs/common";
 
 describe('AuthController', () => {
@@ -35,7 +36,7 @@ describe('AuthController', () => {
   describe('login', () => {
     it('사용자를 로그인하고 액세스 토큰을 반환해야 합니다.', async () => {
       const dto: LoginRequestDto = { id: 'user123', pwd: 'password123' };
-      const res: any = { cookie: jest.fn() };
+      const res = { cookie: jest.fn() } as unknown as Response;
 
       authService.login!.mockResolvedValue({
         accessToken: 'access-token',
@@ -44,13 +45,15 @@ describe('AuthController', () => {
 
       const result = await authController.login(dto, res);
       expect(result).toEqual({ accessToken: 'access-token' });
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(res.cookie).toHaveBeenCalledWith('accesstoken', 'access-token', expect.any(Object));
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(res.cookie).toHaveBeenCalledWith('refreshtoken', 'refresh-token', expect.any(Object));
     });
 
     it('로그인 실패 시 UnauthorizedException을 던져야 합니다.', async () => {
       const dto: LoginRequestDto = { id: 'user1', pwd: 'wrongpass' };
-      const res: any = { cookie: jest.fn() };
+      const res = { cookie: jest.fn() } as unknown as Response;
 
       authService.login!.mockRejectedValue(new UnauthorizedException('Invalid credentials'));
 
@@ -60,30 +63,33 @@ describe('AuthController', () => {
   });
 
   describe('logout', () => {
-    it('사용자를 로그아웃하고 쿠키를 삭제해야 합니다.', async () => {
-      const res: any = { clearCookie: jest.fn() };
+    it('사용자를 로그아웃하고 쿠키를 삭제해야 합니다.', () => {
+      const res = { clearCookie: jest.fn() } as unknown as Response;
 
       authController.logout(res);
 
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(res.clearCookie).toHaveBeenCalledWith('accesstoken');
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(res.clearCookie).toHaveBeenCalledWith('refreshtoken');
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(res.clearCookie).toHaveBeenCalledTimes(2);
     });
   });
 
   describe('refresh', () => {
-    it('리프레시 토큰을 사용하여 새로운 액세스 토큰을 반환해야 합니다.', async () => {
-      const req: any = { cookies: { refreshtoken: 'valid-refresh-token' } };
-      const res: any = { cookie: jest.fn() };
+    it('리프레시 토큰을 사용하여 새로운 액세스 토큰을 반환해야 합니다.', () => {
+      const req = { cookies: { refreshtoken: 'valid-refresh-token' } } as unknown as Request;
+      const res = { cookie: jest.fn() } as unknown as Response;
       authService.refresh!.mockResolvedValue({ accessToken: 'new-access-token' });
 
-      const result = await authController.refresh(req, res);
+      const result = authController.refresh(req, res);
       expect(result).toEqual({ accessToken: 'new-access-token' });
     });
 
     it('리프레시 토큰이 없으면 UnauthorizedException을 던져야 합니다.', async () => {
-      const req: any = { cookies: {} };
-      const res: any = { cookie: jest.fn() };
+      const req = { cookies: {} } as unknown as Request;
+      const res = { cookie: jest.fn() } as unknown as Response;
 
       authService.refresh!.mockRejectedValue(new UnauthorizedException('No refresh token'));
 

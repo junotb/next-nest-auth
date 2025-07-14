@@ -7,7 +7,7 @@ import { InternalServerErrorException, NotFoundException } from '@nestjs/common'
 import { RefreshRequestDto } from './dto/refresh-request.dto';
 import { SignUpRequestDto } from './dto/signup-request.dto';
 import { UpdateRequestDto } from './dto/update-request.dto';
-import { SafeUser } from 'src/common/type/safe-user.type';
+import { SafeUser } from '../common/type/safe-user.type';
 
 jest.mock('jsonwebtoken');
 
@@ -90,7 +90,7 @@ describe('AuthService', () => {
   });
 
   describe('refreshToken', () => {
-    it('토큰을 재발급해야 합니다.', async () => {
+    it('토큰을 재발급해야 합니다.', () => {
       const dto: RefreshRequestDto = { refreshToken: 'validRefreshToken' };
 
       (jwt.verify as jest.Mock).mockReturnValue({ sub: 1 }); // Mock JWT 검증
@@ -98,7 +98,7 @@ describe('AuthService', () => {
         .mockReturnValueOnce('newAccessToken')
         .mockReturnValueOnce('newRefreshToken');
 
-      const result = await authService.refresh(dto);
+      const result = authService.refresh(dto);
       expect(result).toEqual({
         accessToken: 'newAccessToken',
         refreshToken: 'newRefreshToken',

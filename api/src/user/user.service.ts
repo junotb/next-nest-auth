@@ -4,17 +4,29 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { DeleteUserDto } from './dto/delete-user.dto';
-import { SafeUser } from 'src/common/type/safe-user.type';
+import { SafeUser } from '../common/type/safe-user.type';
 
 @Injectable()
 export class UserService {
   constructor(private readonly prisma: PrismaService) {}
 
   /**
+   * 유저 IDX로 유저 정보를 찾습니다.
+   * @param idx - 유저 IDX
+   * @returns 유저 정보
+   * @throws BadRequestException - 유저를 찾을 수 없는 경우
+   */
+  async findByIdx(idx: number): Promise<SafeUser> {
+    const user = await this.prisma.user.findUnique({ where: { idx } });
+    if (!user) throw new BadRequestException('유저를 찾을 수 없습니다.');
+    return this.getSafeUser(user);
+  }
+
+  /**
    * 유저 ID로 유저 정보를 찾습니다.
    * @param id - 유저 ID
    * @returns 유저 정보
-   * @throws NotFoundException - 유저를 찾을 수 없는 경우
+   * @throws BadRequestException - 유저를 찾을 수 없는 경우
    */
   async findById(id: string): Promise<User> {
     const user = await this.prisma.user.findUnique({ where: { id } });

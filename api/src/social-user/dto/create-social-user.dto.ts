@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsEmail, IsInt, IsString, Min } from "class-validator";
+import { IsInt, IsString, Min } from "class-validator";
 
 export class CreateSocialUserDto {
   @ApiProperty({ example: 1, description: "유저 인덱스" })
