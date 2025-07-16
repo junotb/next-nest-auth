@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import axios from "axios";
-import { useAuthStore } from '@/stores/useAuthStore';
 
 // 소셜 플랫폼 별 설정
 const socialProviderConfig = {
@@ -82,29 +81,5 @@ export async function GET(request: NextRequest, { params }: SocialProviderParams
 
   const { id: providerAccountId, email: id, name, nickname } = getUserInfo(infoResponse.data);
 
-  const response = await fetch('http://localhost:3001/auth/login/social', {
-    method: 'POST',
-    credentials: 'include', // withCredentials 대응
-    headers: {
-      'Content-Type': 'application/json',
-      ...(useAuthStore.getState().accessToken && {
-        Authorization: `Bearer ${useAuthStore.getState().accessToken}`,
-      }),
-    },
-    body: JSON.stringify({
-      provider,
-      providerAccountId,
-      id,
-      name,
-      nickname,
-    }),
-  });
-
-  if (!response.ok) {
-    throw new Error(`HTTP error! status: ${response.status}`);
-  }
-
-  const data = await response.json();
-
-  return NextResponse.json({ accessToken: data.accessToken });
+  return NextResponse.redirect(new URL(`/?provider=${provider}&providerAccountId=${providerAccountId}&id=${id}&name=${name}&nickname=${nickname}`, request.url));
 };

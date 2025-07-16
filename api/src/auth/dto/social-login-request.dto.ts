@@ -1,11 +1,11 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsEmail, IsString } from "class-validator";
+import { IsEmail, IsIn, IsString } from "class-validator";
 
 export type SocialProviderType = "naver" | "kakao" | "google";
 
 export class SocialLoginRequestDto {
   @ApiProperty({ example: "naver", description: "소셜 로그인 제공자" })
-  @IsString({ message: "소셜 로그인 제공자는 문자열이어야 합니다." })
+  @IsIn(["naver", "kakao", "google"], { message: "지원하지 않는 소셜 로그인 제공자입니다." })
   provider: SocialProviderType;
 
   @ApiProperty({ example: "socialUser123", description: "소셜 사용자 ID" })

@@ -14,10 +14,8 @@ export class SocialUserService {
    * @param providerAccountId - 소셜 유저 provider 계정 ID
    * @returns 소셜 유저 정보
    */
-  async findByProvider(provider: string, providerAccountId: string): Promise<SocialUser> {
-    const user = await this.prisma.socialUser.findFirst({ where: { provider, providerAccountId } });
-    if (!user) throw new NotFoundException('소셜 유저를 찾을 수 없습니다.');
-    return user;
+  async findByProvider(provider: string, providerAccountId: string): Promise<SocialUser | null> {
+    return await this.prisma.socialUser.findFirst({ where: { provider, providerAccountId } });
   }
 
   /**

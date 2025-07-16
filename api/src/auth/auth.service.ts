@@ -69,41 +69,56 @@ export class AuthService {
   async socialLogin(dto: SocialLoginRequestDto): Promise<SocialLoginResponseDto> {
     const { provider, providerAccountId, id, name, nickname } = dto;
 
-    // 소셜 사용자 조회
-    const exists = await this.socialUserService.findByProvider(provider, providerAccountId);
+    const socialMapping = await this.socialUserService.findByProvider(provider, providerAccountId);
+    let user: SafeUser | null = null;
 
-    const userIdx = exists?.userIdx;
-    let socialUser = exists ? await this.userService.findByIdx(userIdx) : null;
+    if (socialMapping) {
+      // 사용자 소셜 정보로 사용자 조회
+      user = await this.userService.findByIdx(socialMapping.userIdx);
 
-    if (!socialUser) {
-      socialUser = await this.userService.create({
-        id,
-        pwd: '', // 소셜 로그인은 비밀번호가 없으므로 빈 문자열
-        usePwd: 1, // 소셜 로그인 사용
-        name,
-        nickname,
-      });
+      // 사용자 소셜 정보로 연결된 사용자가 없는 경우
+      if (!user) {
+        throw new BadRequestException('연결된 사용자가 존재하지 않습니다.');
+      }
+    } else {
+      // 사용자 정보 조회
+      const existingUser = await this.userService.findById(id);
 
-      if (!userIdx) {
+      if (existingUser) {
+        // 사용자가 존재하는 경우 사용자 소셜 연결
         await this.socialUserService.createSocialUser({
-          userIdx: socialUser.idx,
+          userIdx: existingUser.idx,
+          provider,
+          providerAccountId,
+        });
+        user = existingUser;
+      } else {
+        // 사용자가 존재하지 않는 경우 새 사용자 생성
+        user = await this.userService.create({
+          id,
+          pwd: '',
+          usePwd: 1,
+          name,
+          nickname,
+        });
+
+        // 새 사용자의 사용자 소셜 생성
+        await this.socialUserService.createSocialUser({
+          userIdx: user.idx,
           provider,
           providerAccountId,
         });
       }
     }
 
-    const newNewUser = await this.userService.create({
-      id,
-      pwd: '', // 소셜 로그인은 비밀번호가 없으므로 빈 문자열
-      usePwd: 1, // 소셜 로그인 사용
-      name,
-      nickname,
-    });
+    // JWT 토큰 생성
+    const payload = { sub: user.idx };
+    const accessToken = jwt.sign(payload, this.getJwtSecret(), { expiresIn: "15m" });
+    const refreshToken = jwt.sign(payload, this.getJwtSecret(), { expiresIn: "7d" });
 
     return {
-      accessToken: jwt.sign({ sub: newNewUser.idx }, this.getJwtSecret(), { expiresIn: "15m" }),
-      refreshToken: jwt.sign({ sub: newNewUser.idx }, this.getJwtSecret(), { expiresIn: "7d" }),
+      accessToken,
+      refreshToken,
     };
   }
 

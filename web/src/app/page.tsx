@@ -16,11 +16,28 @@ import { SignUpSchemaType } from "@/schemas/SignUpSchema";
 import { LoginSchemaType } from "@/schemas/LoginSchema";
 import { UpdateSchemaType } from "@/schemas/UpdateSchema";
 import { useAuthStore } from "@/stores/useAuthStore";
+import { useEffect } from "react";
+import { useSearchParams } from "next/navigation";
+
+type Params = {
+  provider?: string;
+  providerAccountId?: string;
+  id?: string;
+  name?: string;
+  nickname?: string;
+};
 
 export default function Home() {
+  const searchParams = useSearchParams();
   const setAccessToken = useAuthStore((state) => state.setAccessToken);
   const { user, mutate } = useProfile();
   const { showToast, Toast } = useToast();
+
+  const provider = searchParams.get('provider');
+  const providerAccountId = searchParams.get('providerAccountId');
+  const id = searchParams.get('id');
+  const name = searchParams.get('name');
+  const nickname = searchParams.get('nickname');
 
   const onSignUpSubmit = async ({ id, pwd, name, nickname }: SignUpSchemaType): Promise<void> => {
     try {
@@ -50,6 +67,30 @@ export default function Home() {
   };
 
   const onSocialLoginClick = (provider: string) => window.location.href = `/api/auth/${provider}`;
+
+  useEffect(() => {
+    if (user) return;
+    if (!provider || !providerAccountId || !id || !name || !nickname) return;
+
+    const onSocialLoginCallback = async ({ provider, providerAccountId, id, name, nickname }: Params): Promise<void> => {
+      console.log("Social Login Callback:", { provider, providerAccountId, id, name, nickname });
+      if (!provider || !providerAccountId || !id || !name || !nickname) return;
+
+      try {
+        const { data } = await api.post("/auth/login/social", { provider, providerAccountId, id, name, nickname });
+        setAccessToken(data.accessToken);
+        showToast("소셜 로그인 성공");
+      } catch (error) {
+        if (error instanceof Error) {
+          showToast(error.message);
+        } else {
+          showToast("소셜 로그인 실패");
+        }
+      }
+    };
+
+    onSocialLoginCallback({ provider, providerAccountId, id, name, nickname });
+  }, [user, provider, providerAccountId, id, name, nickname, setAccessToken, showToast]);
 
   const onProfileSubmit = async (): Promise<void> => {
     try {
