@@ -1,13 +1,14 @@
-import { Controller, Post, Body, Get, UseGuards, Res, HttpCode, Put, Delete, Req, UnauthorizedException } from '@nestjs/common';
+import { Controller, Post, Body, Get, UseGuards, Res, HttpCode, Put, Delete, Req } from '@nestjs/common';
+import { ApiBearerAuth } from '@nestjs/swagger';
 import { Request, Response } from 'express';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { AuthService } from './auth.service';
 import { LoginRequestDto } from './dto/login-request.dto';
+import { SocialLoginRequestDto } from './dto/social-login-request.dto';
+import { SignUpRequestDto } from './dto/signup-request.dto';
+import { UpdateRequestDto } from './dto/update-request.dto';
 import { User } from '../common/decorator/user.decorator';
 import { SafeUser } from '../common/type/safe-user.type';
-import { SignUpRequestDto } from './dto/signup-request.dto';
-import { ApiBearerAuth } from '@nestjs/swagger';
-import { UpdateRequestDto } from './dto/update-request.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -73,6 +74,45 @@ export class AuthController {
   }
 
   /**
+   * 소셜 로그인 콜백 처리
+   * @param request 요청 객체
+   * @param params 소셜 플랫폼 타입
+   * @return 사용자 정보와 토큰
+   * @throws UnauthorizedException 인증되지 않은 사용자 접근 시
+   * @throws InternalServerErrorException JWT 비밀 키가 설정되어 있지 않은 경우
+   * @example
+   * POST /auth/login/social
+   */
+  @Post('login/social')
+  @HttpCode(200)
+  async socialLogin(
+    @Body() dto: SocialLoginRequestDto,
+    @Res({ passthrough: true }) res: Response
+  ) {
+    const { accessToken, refreshToken } = await this.authService.socialLogin(dto);
+
+    // 쿠키에 토큰 저장
+    res.cookie('accesstoken', accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 15 * 60 * 1000, // 15분
+    });
+
+    // 쿠키에 리프레시 토큰 저장
+    res.cookie('refreshtoken', refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7일
+    });
+
+    return {
+      accessToken,
+    };
+  }
+
+  /**
    * 사용자 로그아웃 처리
    * @return 로그아웃 성공 상태 코드
    * @throws UnauthorizedException 인증되지 않은 사용자 접근 시
@@ -101,16 +141,16 @@ export class AuthController {
    */
   @Post('refresh')
   @HttpCode(200)
-  async refresh(
+  refresh(
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response
   ) {
-    const refreshToken = req.cookies?.refreshtoken;
+    const refreshToken = req.cookies?.refreshtoken as string;
 
     const {
       accessToken: newAccessToken,
       refreshToken: newRefreshToken,
-    } = await this.authService.refresh({ refreshToken });
+    } = this.authService.refresh({ refreshToken });
 
     // 쿠키에 새 토큰 저장
     res.cookie('accesstoken', newAccessToken, {

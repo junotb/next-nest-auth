@@ -23,6 +23,11 @@ api.interceptors.response.use(
     if (error.response?.status === 401 && !originalConfig._retry) {
       originalConfig._retry = true;
 
+      // refresh 요청 자체면 인터셉터 재시도 안 함
+      if (originalConfig.url === '/auth/refresh') {
+        return Promise.reject(error);
+      }
+
       try {
         const response = await api.post(
           '/auth/refresh',

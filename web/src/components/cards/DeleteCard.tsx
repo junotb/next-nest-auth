@@ -12,7 +12,7 @@ interface DeleteCardProps {
 export default function DeleteCard({ onSubmit }: DeleteCardProps) {
   const {
     handleSubmit,
-    formState: { errors },
+    formState: {},
   } = useForm<DeleteSchemaType>({
     resolver: zodResolver(DeleteSchema),
   });

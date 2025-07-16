@@ -3,7 +3,7 @@ import { PrismaService } from "../prisma/prisma.service";
 import { UserService } from "./user.service";
 import { BadRequestException } from "@nestjs/common";
 import { CreateUserDto } from "./dto/create-user.dto";
-import { SafeUser } from "src/common/type/safe-user.type";
+import { SafeUser } from "../common/type/safe-user.type";
 import { UpdateUserDto } from "./dto/update-user.dto";
 import { DeleteUserDto } from "./dto/delete-user.dto";
 

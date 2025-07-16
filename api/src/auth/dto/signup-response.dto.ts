@@ -1,4 +1,4 @@
-import { SafeUser } from "src/common/type/safe-user.type";
+import { SafeUser } from "../../common/type/safe-user.type";
 
 export class SignUpResponseDto {
   user: SafeUser;
