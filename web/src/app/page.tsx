@@ -73,7 +73,6 @@ export default function Home() {
     if (!provider || !providerAccountId || !id || !name || !nickname) return;
 
     const onSocialLoginCallback = async ({ provider, providerAccountId, id, name, nickname }: Params): Promise<void> => {
-      console.log("Social Login Callback:", { provider, providerAccountId, id, name, nickname });
       if (!provider || !providerAccountId || !id || !name || !nickname) return;
 
       try {

@@ -58,28 +58,39 @@ export async function GET(request: NextRequest, { params }: SocialProviderParams
   const { provider } = params;
   const { tokenUrl, infoUrl, clientId, clientSecret, redirectUri, getUserInfo } = socialProviderConfig[provider];
 
-  const tokenResponse = await axios({
-    url: tokenUrl,
-    method: provider === 'google' ? 'POST' : 'GET',
-    [provider === 'google' ? 'data' : 'params']: {
-      grant_type: 'authorization_code',
-      client_id: clientId,
-      client_secret: clientSecret,
-      redirect_uri: redirectUri,
-      code,
-      state,
-    },
-  });
+  let providerToken;
 
-  const providerToken = tokenResponse.data.access_token;
+  try {
+    const tokenResponse = await axios({
+      url: tokenUrl,
+      method: provider === 'google' ? 'POST' : 'GET',
+      [provider === 'google' ? 'data' : 'params']: {
+        grant_type: 'authorization_code',
+        client_id: clientId,
+        client_secret: clientSecret,
+        redirect_uri: redirectUri,
+        code,
+        state,
+      },
+    });
+    providerToken = tokenResponse.data.access_token;
+  } catch {
+    return NextResponse.redirect(new URL("/?error=provider_token_error", request.url));
+  }
 
-  const infoResponse = await axios.get(infoUrl, {
-    headers: {
-      Authorization: `Bearer ${providerToken}`,
-    },
-  });
+  let userInfo;
+  try {
+    const infoResponse = await axios.get(infoUrl, {
+      headers: {
+        Authorization: `Bearer ${providerToken}`,
+      },
+    });
+    userInfo = getUserInfo(infoResponse.data);
+  } catch {
+    return NextResponse.redirect(new URL("/?error=user_info_error", request.url));
+  }
 
-  const { id: providerAccountId, email: id, name, nickname } = getUserInfo(infoResponse.data);
+  const { id: providerAccountId, email: id, name, nickname } = userInfo;
 
   return NextResponse.redirect(new URL(`/?provider=${provider}&providerAccountId=${providerAccountId}&id=${id}&name=${name}&nickname=${nickname}`, request.url));
 };
