@@ -12,7 +12,7 @@ interface ProfileCardProps {
 export default function ProfileCard({ onSubmit }: ProfileCardProps) {
   const {
     handleSubmit,
-    formState: { errors },
+    formState: {},
   } = useForm<ProfileSchemaType>({
     resolver: zodResolver(ProfileSchema),
   });

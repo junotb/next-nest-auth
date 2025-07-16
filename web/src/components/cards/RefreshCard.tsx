@@ -12,7 +12,7 @@ interface RefreshCardProps {
 export default function RefreshCard({ onSubmit }: RefreshCardProps) {
   const {
     handleSubmit,
-    formState: { errors },
+    formState: {},
   } = useForm<RefreshSchemaType>({
     resolver: zodResolver(RefreshSchema),
   });

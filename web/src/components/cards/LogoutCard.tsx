@@ -12,7 +12,7 @@ interface LogoutCardProps {
 export default function LogoutCard({ onSubmit }: LogoutCardProps) {
   const {
     handleSubmit,
-    formState: { errors },
+    formState: {},
   } = useForm<LogoutSchemaType>({
     resolver: zodResolver(LogoutSchema),
   });
