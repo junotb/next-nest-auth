@@ -1,36 +1,67 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 웹 클라이언트 (Next.js)
 
-## Getting Started
+Next.js 15을 기반으로 한 API 서버와 연동되는 프론트엔드 서버입니다.
 
-First, run the development server:
+## 주요 기능
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- 사용자 로그인/로그아웃
+- JWT 토큰 저장 및 자동 인증 헤더 처리
+- Zustand로 전역 사용자 인증 정보 관리
+- Zod와 React Hook Form를 활용한 폼 데이터 입력 및 검증
+- Axios와 SWR을 통한 서버 데이터 통신, 클라이언트 측 캐싱 및 데이터 동기화
+
+## 기술 스택
+
+- **프레임워크**: Next.js 15.3.3
+- **언어**: TypeScript
+- **스타일**: Tailwind CSS, clsx
+- **상태 관리**: Zustand, SWR
+- **폼 유효성 검사**: Zod, React Hook Form
+- **API 통신**: Axios
+
+## 프로젝트 구조
+
+```
+record-to-webm/
+├── src/
+│   ├── app/
+│   │   ├── api/
+│   │   ├── favicon.ico
+│   │   ├── globals.css
+│   │   ├── layout.tsx
+│   │   └── page.tsx
+│   ├── components/
+│   ├── hooks/
+│   ├── libs/
+│   ├── schemas/
+│   ├── stores/
+│   └── types/
+├── public/
+├── package.json
+└── README.md
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 환경 변수
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+소셜 로그인 기능을 사용하려면 다음 값을 설정해야 합니다.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- `NAVER_AUTH_URL`, `NAVER_TOKEN_URL`, `NAVER_INFO_URL`
+- `NAVER_CLIENT_ID`, `NAVER_CLIENT_SECRET`, `NAVER_REDIRECT_URI`
+- `KAKAO_AUTH_URL`, `KAKAO_TOKEN_URL`, `KAKAO_INFO_URL`
+- `KAKAO_CLIENT_ID`, `KAKAO_CLIENT_SECRET`, `KAKAO_REDIRECT_URI`
+- `GOOGLE_AUTH_URL`, `GOOGLE_TOKEN_URL`, `GOOGLE_INFO_URL`
+- `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_REDIRECT_URI`
 
-## Learn More
+## 설치 및 실행
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+cd web
+npm install
+npm run dev
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 테스트
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+npm run lint
+```
