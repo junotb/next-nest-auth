@@ -63,11 +63,10 @@ record-to-webm/
 
 ## 환경 변수
 
-소셜 로그인 기능을 사용하려면 다음 값을 설정해야 합니다.
+DB 접속과 토큰 발급을 위해 다음 값을 설정해야 합니다.
 
 - `DATABASE_URL`
 - `JWT_SECRET`
-- `NODE_ENV`
 
 ## 설치 및 실행
 
